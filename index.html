@@ -9,11 +9,13 @@
             --gold: #d4af37; --deep-red: #4a0404; --saffron: #f4c430; --dark-bg: #120a06; --card-bg: #1c110a; --text: #f0e6d2; --accent: #8b4513;
         }
         * { box-sizing: border-box; }
-        body { background-color: var(--dark-bg); color: var(--text); font-family: 'Palatino', serif; margin: 0; display: flex; flex-direction: column; align-items: center; padding: 10px; background-image: radial-gradient(circle at center, #2a1810 0%, #120a06 100%); min-height: 100vh; }
+        body { background-color: var(--dark-bg); color: var(--text); font-family: 'Palatino', serif; margin: 0; overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at center, #2a1810 0%, #120a06 100%); }
+        
+        #main-app { display: flex; flex-direction: column; align-items: center; padding: 10px; transition: filter 0.8s ease, opacity 0.8s ease; }
         h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 2px; margin: 15px 0; border-bottom: 2px solid var(--gold); padding-bottom: 5px; font-size: 1.3rem; text-align: center; }
         
         .top-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 15px; }
-        .lang-btn, .action-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 4px 8px; cursor: pointer; font-size: 0.65rem; border-radius: 4px; }
+        .lang-btn, .action-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 4px 8px; cursor: pointer; font-size: 0.65rem; border-radius: 4px; transition: 0.3s; }
         .active { background: var(--gold) !important; color: var(--deep-red) !important; }
 
         .container { max-width: 1100px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -27,45 +29,95 @@
         input { width: 100%; padding: 8px; background: #0a0a0a; border: 1px solid var(--accent); color: white; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; text-align: center; }
         button.main-btn { background: var(--deep-red); color: var(--gold); border: 1px solid var(--gold); padding: 12px; cursor: pointer; text-transform: uppercase; width: 100%; border-radius: 4px; font-size: 0.9rem; font-weight: bold; }
         
+        /* Response Styles */
         .narrative-section { margin-bottom: 30px; }
-        .narrative-title { color: var(--saffron); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; display: block; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--gold); padding-bottom: 5px; }
+        .narrative-title { color: var(--saffron); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; display: block; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--gold); padding-bottom: 5px; text-align: center; }
         .text-technical { font-style: italic; color: #fff; margin-bottom: 10px; line-height: 1.6; font-size: 1.05rem; }
         .text-colloquial { color: #d1c7b7; line-height: 1.5; font-size: 0.95rem; }
         .insight-box { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); padding: 15px; border-radius: 8px; margin-top: 20px; font-style: italic; color: var(--gold); }
         .remedy-item { margin-bottom: 8px; color: var(--saffron); font-weight: bold; }
 
-        .loading { text-align: center; padding: 20px; color: var(--saffron); animation: glow 2s infinite; font-size: 0.85rem; }
-        @keyframes glow { 50% { opacity: 0.5; } }
+        /* Meditation Overlay */
+        #meditation-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(18, 10, 6, 0.98); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .om-symbol { font-size: 10rem; color: var(--gold); text-shadow: 0 0 50px rgba(212, 175, 55, 0.6); margin-bottom: 20px; animation: pulse-glow 4s infinite ease-in-out; user-select: none; }
+        @keyframes pulse-glow { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+        .bindu { width: 20px; height: 20px; background: radial-gradient(circle, #fff, var(--gold)); border-radius: 50%; box-shadow: 0 0 30px 10px var(--gold); position: absolute; z-index: 2001; }
+        #meditation-status { color: var(--gold); font-family: serif; font-style: italic; letter-spacing: 3px; margin-top: 60px; text-align: center; font-size: 1.2rem; }
+
+        /* Blur State */
+        .app-blurred { filter: blur(12px); opacity: 0.3; pointer-events: none; }
+
+        #history-explorer { margin-top: 30px; width: 100%; max-width: 1000px; display: none; }
+        .history-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--accent); cursor: pointer; font-size: 0.8rem; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px; }
+        .modal-content { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 12px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     </style>
     <script src="config.js"></script>
 </head>
 <body>
 
-    <h1>Rishi Ashtamangala</h1>
-
-    <div class="top-controls">
-        <div class="lang-selector">
-            <button class="lang-btn active" id="btn-en" onclick="setLang('en')">ENG</button>
-            <button class="lang-btn" id="btn-es" onclick="setLang('es')">ESP</button>
-            <button class="lang-btn" id="btn-it" onclick="setLang('it')">ITA</button>
+    <div id="meditation-overlay">
+        <div class="om-symbol">ॐ</div>
+        <div id="tattva-container" style="position:relative; width: 400px; height: 400px;">
+            <div class="bindu" id="sacred-bindu"></div>
         </div>
-        <button class="action-btn" onclick="toggleExplorer()">📜 History</button>
+        <div id="meditation-status">Preparing the Sacred Space...</div>
     </div>
 
-    <div class="input-group" style="width:100%; max-width:600px;">
-        <input type="text" id="userQuestion" placeholder="Enter your question for the Oracle...">
-        <div class="container" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
-            <div class="card"><input type="number" id="bLat" placeholder="Birth Lat" step="any"><input type="number" id="bLon" placeholder="Birth Lon" step="any"><input type="datetime-local" id="bTime"></div>
-            <div class="card"><input type="number" id="pLat" placeholder="Current Lat" step="any"><input type="number" id="pLon" placeholder="Current Lon" step="any"><button class="main-btn" style="font-size:0.6rem; padding:5px" onclick="useMyLocation()">Detect Location</button></div>
+    <div id="main-app">
+        <h1>Rishi Ashtamangala</h1>
+
+        <div class="top-controls">
+            <div class="lang-selector">
+                <button class="lang-btn active" id="btn-en" onclick="setLang('en')">ENG</button>
+                <button class="lang-btn" id="btn-es" onclick="setLang('es')">ESP</button>
+                <button class="lang-btn" id="btn-it" onclick="setLang('it')">ITA</button>
+            </div>
+            <button class="action-btn" onclick="toggleExplorer()">📜 History</button>
+            <div style="display:flex; align-items:center; gap:5px; font-size:0.65rem;">
+                <span>Memory (min):</span>
+                <input type="number" id="memoryMins" value="30" style="width:40px; margin:0; padding:2px;">
+            </div>
         </div>
-        <button class="main-btn" onclick="runCast()">Invoke Sacred Ceremony</button>
+
+        <div class="input-group" style="width:100%; max-width:600px;">
+            <input type="text" id="userQuestion" placeholder="Enter your question for the Oracle...">
+            <div class="container" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
+                <div class="card" style="padding:10px;">
+                    <h3 style="font-size: 0.65rem; margin: 0 0 5px 0; color: var(--gold); text-align: center;">Janma (Birth)</h3>
+                    <input type="number" id="bLat" placeholder="Lat" step="any">
+                    <input type="number" id="bLon" placeholder="Lon" step="any">
+                    <input type="datetime-local" id="bTime">
+                </div>
+                <div class="card" style="padding:10px;">
+                    <h3 style="font-size: 0.65rem; margin: 0 0 5px 0; color: var(--gold); text-align: center;">Prasna (Current)</h3>
+                    <input type="number" id="pLat" placeholder="Lat" step="any">
+                    <input type="number" id="pLon" placeholder="Lon" step="any">
+                    <button class="action-btn" onclick="useMyLocation()" style="width: 100%; margin-top: 5px;">📍 Detect Geo</button>
+                </div>
+            </div>
+            <button class="main-btn" onclick="startRitual()">Invoke Sacred Ceremony</button>
+        </div>
+
+        <div class="container">
+            <div class="card full-width"><canvas id="chartCanvas" width="600" height="600"></canvas></div>
+            <div id="results" class="full-width" style="display:none;">
+                <div class="card"><h2 id="struct-title" style="color:var(--gold); text-align:center;"></h2><div id="structure-content"></div></div>
+                <div class="card"><h2 id="advice-title" style="color:var(--gold); text-align:center;"></h2><div id="advice-content"></div></div>
+            </div>
+        </div>
+
+        <div id="history-explorer">
+            <h2>Previous Consultations</h2>
+            <div id="history-list"></div>
+            <button class="action-btn" onclick="clearHistory()" style="margin-top:10px; color:red;">Clear History</button>
+        </div>
     </div>
 
-    <div class="container">
-        <div class="card full-width"><canvas id="chartCanvas" width="600" height="600"></canvas></div>
-        <div id="results" class="full-width" style="display:none;">
-            <div class="card"><h2 id="struct-title" style="color:var(--gold); text-align:center;"></h2><div id="structure-content"></div></div>
-            <div class="card"><h2 id="advice-title" style="color:var(--gold); text-align:center;"></h2><div id="advice-content"></div></div>
+    <div id="historyModal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="action-btn" onclick="closeModal()" style="float:right">X</button>
+            <div id="modalBody"></div>
         </div>
     </div>
 
@@ -75,11 +127,28 @@
         const ctx = canvas.getContext('2d');
         const rashiSanskrit = ["Mesha", "Vrishabha", "Mithuna", "Karka", "Simha", "Kanya", "Thula", "Vrischika", "Dhanus", "Makara", "Kumbha", "Meena"];
         const houseCoords = { 12:[0,0], 1:[1,0], 2:[2,0], 3:[3,0], 11:[0,1], 4:[3,1], 10:[0,2], 5:[3,2], 9:[0,3], 8:[1,3], 7:[2,3], 6:[3,3] };
-        const planetColors = { "Sun":"#FFD700", "Moon":"#C0C0C0", "Mars":"#FF4500", "Mercury":"#32CD32", "Jupiter":"#F4C430", "Venus":"#FF69B4", "Saturn":"#4682B4" };
-        let currentLang = 'en';
+        
+        let currentLang = 'en'; // FIXED: Declare before any usage
+
+        const i18n = {
+            en: { 
+                up: "Upright", dn: "Reversed",
+                planets: { "Sun":"Surya", "Moon":"Chandra", "Mars":"Mangala", "Mercury":"Budha", "Jupiter":"Guru", "Venus":"Shukra", "Saturn":"Shani", "Rahu":"Rahu", "Ketu":"Ketu", "Uranus":"Indra" }
+            },
+            es: { 
+                up: "Derecho", dn: "Invertido",
+                planets: { "Sun":"Surya", "Moon":"Chandra", "Mars":"Mangala", "Mercury":"Budha", "Jupiter":"Guru", "Venus":"Shukra", "Saturn":"Shani", "Rahu":"Rahu", "Ketu":"Ketu", "Uranus":"Indra" }
+            },
+            it: { 
+                up: "Diritto", dn: "Rovescio",
+                planets: { "Sun":"Surya", "Moon":"Chandra", "Mars":"Mangala", "Mercury":"Budha", "Jupiter":"Guru", "Venus":"Shukra", "Saturn":"Shani", "Rahu":"Rahu", "Ketu":"Ketu", "Uranus":"Indra" }
+            }
+        };
+
+        const planetColors = { "Sun":"#FFD700", "Moon":"#C0C0C0", "Mars":"#FF4500", "Mercury":"#32CD32", "Jupiter":"#F4C430", "Venus":"#FF69B4", "Saturn":"#4682B4", "Rahu":"#4B0082", "Ketu":"#808080", "Uranus":"#AFEEEE" };
 
         function setLang(l) { currentLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); document.getElementById('btn-'+l).classList.add('active'); }
-        function useMyLocation() { navigator.geolocation.getCurrentPosition(p => { document.getElementById('pLat').value = p.coords.latitude.toFixed(4); document.getElementById('pLon').value = p.coords.longitude.toFixed(4); }); }
+        function useMyLocation() { if (navigator.geolocation) navigator.geolocation.getCurrentPosition(p => { document.getElementById('pLat').value = p.coords.latitude.toFixed(4); document.getElementById('pLon').value = p.coords.longitude.toFixed(4); }); }
 
         function drawGoldCoin(x, y) {
             ctx.save(); ctx.translate(x, y);
@@ -94,13 +163,14 @@
         function drawShell(x, y, isUp) {
             ctx.save(); ctx.translate(x, y);
             ctx.beginPath(); ctx.ellipse(0, 0, 5, 3, 0, 0, Math.PI * 2);
-            if (isUp) { ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 1; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-2.5, 0); ctx.lineTo(2.5, 0); ctx.stroke(); }
+            if (isUp) { ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-2.5, 0); ctx.lineTo(2.5, 0); ctx.stroke(); }
             else { ctx.fillStyle = 'rgba(212, 175, 55, 0.5)'; ctx.fill(); ctx.strokeStyle = '#d4af37'; ctx.stroke(); }
             ctx.restore();
         }
 
         function drawChart(cast, transitPlanets = {}) {
             const size = canvas.width; const step = size / 4; ctx.clearRect(0,0,size,size);
+            const t = i18n[currentLang];
             for(let h=1; h<=12; h++) {
                 const [cx, cy] = houseCoords[h]; const x = cx * step, y = cy * step;
                 const shells = cast.board[h] || [];
@@ -108,115 +178,171 @@
                 const dn = shells.length - up;
                 const ratio = shells.length > 0 ? up / shells.length : 0.5;
                 
-                // --- 1. Background Coloring ---
-                // Reddish (DN) to Goldish (UP) interpolation
-                const r = Math.floor(40 + ratio * 120);
-                const g = Math.floor(20 + ratio * 100);
-                const b = Math.floor(10 + ratio * 30);
-                
                 let hasPlanet = false;
                 for (const p in transitPlanets) { if (transitPlanets[p].house === h) hasPlanet = true; }
                 
-                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${hasPlanet ? 0.7 : 0.4})`;
-                ctx.fillRect(x, y, step, step);
-                ctx.strokeStyle = "rgba(212,175,55,0.3)"; ctx.lineWidth = 1;
-                ctx.strokeRect(x, y, step, step);
-
-                // --- 2. House Summary Overlay ---
-                ctx.fillStyle = "rgba(255,255,255,0.15)";
-                ctx.font = "bold 40px serif"; ctx.textAlign="center";
-                ctx.fillText(h, x + step/2, y + step/2 + 15);
-
-                // House Name
-                ctx.fillStyle = "#d4af37"; ctx.font = "bold 11px serif";
-                ctx.fillText(rashiSanskrit[h-1], x + step/2, y + 15);
+                ctx.fillStyle = `rgba(${Math.floor(50 + ratio * 100)}, ${Math.floor(25 + ratio * 50)}, 10, ${hasPlanet ? 0.7 : 0.4})`;
+                ctx.fillRect(x,y,step,step);
+                ctx.strokeStyle = "rgba(212,175,55,0.3)"; ctx.strokeRect(x,y,step,step);
                 
-                // U/D Summary
-                ctx.font = "bold 9px Arial"; ctx.fillStyle = "rgba(212,175,55,0.8)";
-                ctx.fillText(`${up}U / ${dn}D`, x + step/2, y + step - 8);
-
-                // --- 3. Planet Stacking ---
-                let py = 30;
+                ctx.fillStyle = "#d4af37"; ctx.font = "bold 10px serif"; ctx.textAlign="center";
+                ctx.fillText(rashiSanskrit[h-1], x+step/2, y+15);
+                ctx.font = "bold 8px Arial"; ctx.fillText(`${up} ${t.up} / ${dn} ${t.dn}`, x+step/2, y+step-8);
+                
                 let planetsInHouse = Object.entries(transitPlanets).filter(([p, d]) => d.house === h);
                 planetsInHouse.forEach(([p, d], idx) => {
                     ctx.fillStyle = planetColors[p] || "#fff";
-                    ctx.font = "bold 10px Arial";
-                    // Stack them or space them
-                    const px = x + 15 + (idx % 2) * (step - 30);
-                    const currentPy = y + 30 + Math.floor(idx / 2) * 12;
+                    ctx.font = "bold 9px Arial";
+                    const px = x + 10 + (idx % 2) * (step - 20);
+                    const py = y + 28 + Math.floor(idx / 2) * 10;
                     ctx.textAlign = (idx % 2 === 0) ? "left" : "right";
-                    ctx.fillText(p.slice(0,2), px, currentPy);
+                    ctx.fillText(`${i18n[currentLang].planets[p] || p}`, px, py);
                 });
                 ctx.textAlign = "center";
 
-                // --- 4. Special Markers ---
-                if (h === cast.arudha) drawGoldCoin(x + step - 25, y + 25);
+                if (h === cast.arudha) drawGoldCoin(x+step-25, y+25);
                 if (cast.janma_lagna && cast.janma_lagna.house === h) {
-                    ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 2;
-                    ctx.strokeRect(x+6, y+6, step-12, step-12);
-                    ctx.fillStyle = "#00ff00"; ctx.font = "bold 9px Arial";
-                    ctx.fillText("LAGNA", x+step/2, y+step-20);
+                    ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 2; ctx.strokeRect(x+5,y+5,step-10,step-10);
+                    ctx.fillStyle = "#00ff00"; ctx.font = "bold 9px Arial"; ctx.fillText("LAGNA", x+step/2, y+step-20);
                 }
-
-                // --- 5. Shells Grid ---
-                const shellAreaY = 45 + Math.ceil(planetsInHouse.length / 2) * 12;
+                
+                // Use actual spatial positions if available, otherwise fallback to grid
                 shells.forEach((s, idx) => {
-                    const sx = x + 15 + (idx % 6) * 15;
-                    const sy = y + shellAreaY + Math.floor(idx / 6) * 10;
+                    let sx, sy;
+                    if (s.pos) {
+                        sx = x + 10 + (s.pos[0] / 100) * (step - 20);
+                        sy = y + 40 + (s.pos[1] / 100) * (step - 60);
+                    } else {
+                        sx = x + 12 + (idx % 5) * 18;
+                        sy = y + 40 + Math.floor(idx / 5) * 10;
+                    }
                     if (sy < y + step - 15) drawShell(sx, sy, s.up === "UP");
                 });
             }
-            // Center Motif
             ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 3; ctx.strokeRect(0,0,size,size);
             ctx.fillStyle="#d4af37"; ctx.font="30px serif"; ctx.fillText("ॐ", size/2, size/2+10);
         }
 
-        async function runCast() {
+        // History System
+        function saveSession(data) { let h = JSON.parse(localStorage.getItem('rishi_history') || '[]'); h.unshift({ ...data, timestamp: Date.now() }); localStorage.setItem('rishi_history', JSON.stringify(h)); }
+        function getMemoryHistory() { 
+            const mins = parseInt(document.getElementById('memoryMins').value) || 30;
+            const h = JSON.parse(localStorage.getItem('rishi_history') || '[]');
+            const now = Date.now();
+            const cut = now - (mins * 60 * 1000);
+            return h.filter(x => x.timestamp > cut).map(x => {
+                const ago = Math.round((now - x.timestamp) / 60000);
+                // Extracting summaries for AI context
+                const techSum = x.structure?.janma_transit_analysis?.technical || 
+                               (x.structure?.sections && x.structure.sections[0]?.technical_rishi) || "";
+                const spirPred = x.advice?.final_prediction || 
+                                (x.advice?.spiritual_guidance?.final_prediction) || "";
+                
+                return { 
+                    time_ago: `${ago} minutes ago`,
+                    question: x.cast.question, 
+                    technical_summary: techSum,
+                    spiritual_prediction: spirPred
+                };
+            });
+        }
+        function toggleExplorer() { const e = document.getElementById('history-explorer'); e.style.display = e.style.display === 'block' ? 'none' : 'block'; if (e.style.display === 'block') renderHistory(); }
+        function renderHistory() { const l = document.getElementById('history-list'); const h = JSON.parse(localStorage.getItem('rishi_history') || '[]'); l.innerHTML = h.map((x, i) => `<div class="history-item" onclick="viewHistoryItem(${i})"><strong>${new Date(x.timestamp).toLocaleString()}</strong> - ${x.cast.question || 'General'}</div>`).join('') || '<p>No history.</p>'; }
+        function viewHistoryItem(i) { 
+            const x = JSON.parse(localStorage.getItem('rishi_history'))[i]; 
+            const b = document.getElementById('modalBody');
+            b.innerHTML = `<h3>${x.cast.question || 'Reading'}</h3><p>${new Date(x.timestamp).toLocaleString()}</p><hr><div id="hist-struct"></div><div id="hist-advice"></div>`;
+            renderStructure(x.structure);
+            renderAdvice(x.advice);
+            document.getElementById('historyModal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('historyModal').style.display = 'none'; }
+        function clearHistory() { if (confirm('Clear?')) { localStorage.removeItem('rishi_history'); renderHistory(); } }
+
+        function renderStructure(struct) {
+            document.getElementById("struct-title").innerText = struct.analysis_title || "Celestial Structure";
+            const structSections = struct.sections || [];
+            document.getElementById("structure-content").innerHTML = structSections.map(s => `
+                <div class="narrative-section">
+                    <span class="narrative-title">${s.title || "Observation"}</span>
+                    <p class="text-technical">${s.technical_rishi || s.technical}</p>
+                    <p class="text-colloquial">${s.colloquial_modern || s.colloquial}</p>
+                </div>`).join("") + (struct.concluding_insight ? `<div class="insight-box">${struct.concluding_insight}</div>` : "");
+        }
+
+        function renderAdvice(advice) {
+            const adv = advice.spiritual_guidance || advice;
+            document.getElementById("advice-title").innerText = adv.counsel_title || "Spiritual Guidance";
+            const advNarrative = adv.guidance_narrative || adv.narrative_sections || [];
+            const remedies = adv.specific_remedies || [];
+            document.getElementById("advice-content").innerHTML = advNarrative.map(s => `
+                <div class="narrative-section">
+                    <span class="narrative-title">${s.heading || s.title}</span>
+                    <p class="text-colloquial">${s.content || s.body}</p>
+                </div>`).join("") + `
+                <div class="narrative-section">
+                    <span class="narrative-title">Sacred Remedies</span>
+                    <ul style="padding-left:20px">${remedies.map(r => `<li class="remedy-item">${r}</li>`).join("")}</ul>
+                </div>
+                <div class="insight-box" style="color:var(--saffron); border-color:var(--saffron)">
+                    <strong>Final Prediction:</strong> ${adv.final_prediction}
+                </div>`;
+        }
+
+        async function runMeditation() {
+            const overlay = document.getElementById('meditation-overlay');
+            const bindu = document.getElementById('sacred-bindu');
+            const status = document.getElementById('meditation-status');
+            const duration = (Math.floor(Math.random() * (46 - 21 + 1)) + 21) * 1000;
+            overlay.style.display = 'flex';
+            const start = Date.now();
+            return new Promise(resolve => {
+                function frame() {
+                    const elapsed = Date.now() - start;
+                    const progress = elapsed / duration;
+                    if (progress < 1) {
+                        const radius = (1 - progress) * 150 + 20;
+                        const angle = progress * Math.PI * 20;
+                        const x = Math.cos(angle) * radius + 200;
+                        const y = Math.sin(angle) * radius + 200;
+                        bindu.style.left = (x - 10) + 'px';
+                        bindu.style.top = (y - 10) + 'px';
+                        requestAnimationFrame(frame);
+                    } else {
+                        status.innerText = "The Oracle awakens...";
+                        setTimeout(resolve, 1000);
+                    }
+                }
+                requestAnimationFrame(frame);
+            });
+        }
+
+        async function startRitual() {
             const q = document.getElementById("userQuestion").value;
             const b = { lat: parseFloat(document.getElementById('bLat').value), lon: parseFloat(document.getElementById('bLon').value), time: document.getElementById('bTime').value };
             const p = { lat: parseFloat(document.getElementById('pLat').value), lon: parseFloat(document.getElementById('pLon').value), time: new Date().toISOString() };
-            
-            document.getElementById("results").style.display = "none";
-            document.getElementById("structure-content").innerHTML = '<div class="loading">Consulting the Cosmic Weave...</div>';
-            
+            await runMeditation();
+            const app = document.getElementById('main-app');
+            const overlay = document.getElementById('meditation-overlay');
+            const status = document.getElementById('meditation-status');
+            app.classList.add('app-blurred');
+            status.innerText = "Consulting the Ancient Scripts...";
             try {
                 const nist = await fetch("https://beacon.nist.gov/beacon/2.0/pulse/last").then(r => r.json());
                 const bits = [...nist.pulse.outputValue].map(h => parseInt(h,16).toString(2).padStart(4,"0")).join("");
                 const cast = await fetch(`${API_BASE}/cast`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bits, q, lang: currentLang, birth: b.lat ? b : undefined, prasna: p.lat ? p : undefined }) }).then(r => r.json());
-                
                 drawChart(cast, cast.transit_planets);
-
-                const struct = await fetch(`${API_BASE}/interpret/structure`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast }) }).then(r => r.json());
-                document.getElementById("struct-title").innerText = struct.analysis_title || "Celestial Structure";
-                const structSections = struct.sections || [];
-                document.getElementById("structure-content").innerHTML = structSections.map(s => `
-                    <div class="narrative-section">
-                        <span class="narrative-title">${s.title || "Observation"}</span>
-                        <p class="text-technical">${s.technical_rishi || s.technical}</p>
-                        <p class="text-colloquial">${s.colloquial_modern || s.colloquial}</p>
-                    </div>`).join("") + (struct.concluding_insight ? `<div class="insight-box">${struct.concluding_insight}</div>` : "");
-
-                const advice = await fetch(`${API_BASE}/interpret/advice`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast, structure: struct }) }).then(r => r.json());
-                const adv = advice.spiritual_guidance || advice;
-                document.getElementById("advice-title").innerText = adv.counsel_title || "Spiritual Guidance";
-                const advNarrative = adv.guidance_narrative || adv.narrative_sections || [];
-                const remedies = adv.specific_remedies || [];
-                
-                document.getElementById("advice-content").innerHTML = advNarrative.map(s => `
-                    <div class="narrative-section">
-                        <span class="narrative-title">${s.heading || s.title}</span>
-                        <p class="text-colloquial">${s.content || s.body}</p>
-                    </div>`).join("") + `
-                    <div class="narrative-section">
-                        <span class="narrative-title">Sacred Remedies</span>
-                        <ul style="padding-left:20px">${remedies.map(r => `<li class="remedy-item">${r}</li>`).join("")}</ul>
-                    </div>
-                    <div class="insight-box" style="color:var(--saffron); border-color:var(--saffron)">
-                        <strong>Final Prediction:</strong> ${adv.final_prediction}
-                    </div>`;
-
+                status.innerText = "Synthesizing the Stars...";
+                const struct = await fetch(`${API_BASE}/interpret/structure`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast, history: getMemoryHistory() }) }).then(r => r.json());
+                renderStructure(struct);
+                status.innerText = "Receiving Spiritual Counsel...";
+                const advice = await fetch(`${API_BASE}/interpret/advice`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast, structure: struct, history: getMemoryHistory() }) }).then(r => r.json());
+                renderAdvice(advice);
                 document.getElementById("results").style.display = "block";
-            } catch (err) { console.error(err); alert("Ritual interrupted."); }
+                saveSession({ cast, structure: struct, advice });
+                overlay.style.display = 'none';
+                app.classList.remove('app-blurred');
+            } catch (err) { alert("Ritual interrupted."); overlay.style.display = 'none'; app.classList.remove('app-blurred'); }
         }
         drawChart({arudha:0, board:{}});
     </script>
