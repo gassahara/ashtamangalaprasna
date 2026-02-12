@@ -7,6 +7,7 @@ import { sidereal, solar, nutation, moonposition, julian } from "https://esm.sh/
 interface Shell {
   id: number;
   up: "UP" | "DN";
+  pos: [number, number]; // [x, y] relative within house
 }
 
 interface CastResult {
@@ -82,10 +83,9 @@ async function calculateAstro(lat: number, lon: number, timeStr: string, isBirth
     const moonL = moonPos.lon * 180 / Math.PI;
     planets["Moon"] = { house: longToHouse(moonL, ayanamsa), degrees: (moonL + 360) % 360 };
     
-    // Major transit planets (Deterministic simulation for edge performance)
-    const pList = ["Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
+    const pList = ["Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu", "Uranus"];
     for(const p of pList) {
-        const offset = (Math.sin(jd * (pList.indexOf(p) + 1)) * 180);
+        const offset = (Math.sin(jd * (pList.indexOf(p) + 3)) * 180);
         const pos = (sunL + offset + 360) % 360;
         planets[p] = { house: longToHouse(pos, ayanamsa), degrees: pos };
     }
@@ -126,7 +126,12 @@ async function simulateCast(rawBits: string, q?: string, lang?: string, birth?: 
     const house = Number((e >> 1n) % 12n) + 1;
     const isUp = (e & 1n) === 1n;
     if (isUp) total_up++; else total_dn++;
-    board[house].push({ id: i + 1, up: isUp ? "UP" : "DN" });
+    
+    // Spatial component: relative position within house (0-100)
+    const px = Number((e >> 10n) % 100n);
+    const py = Number((e >> 17n) % 100n);
+    
+    board[house].push({ id: i + 1, up: isUp ? "UP" : "DN", pos: [px, py] });
   }
 
   const pastCount = board[12].length + board[1].length + board[2].length;
@@ -193,19 +198,38 @@ Deno.serve(async (req) => {
     }
 
     if (url.pathname.includes("/interpret/structure")) {
-        const { cast } = body;
-        const system = `You are a Vedic Jyotishi. You MUST return JSON. Use ${lang}.
+        const { cast, history } = body;
+        const system = `You are a Vedic Jyotishi and technical expert in Ashtamangala Prasna. You MUST return JSON. Use ${lang}.
+        
+        Analyze the technical structure based on:
+        1. Spatial distribution of shells (clusters, empty houses, orientation patterns).
+        2. The 8-symbol time pile logic (1:Dhwaja, 2:Dhumra, 3:Simha, 4:Shwana, 5:Vrushabha, 6:Khara, 7:Gaja, 8:Dhwanksha).
+        3. The interaction between Arudha, Janma Lagna (if present), and transit planets.
+        4. Evolution from previous questions in this session memory.
+
         Schema: {
           "analysis_title": "string",
           "sections": [ { "title": "string", "technical_rishi": "string", "colloquial_modern": "string" } ],
           "concluding_insight": "string"
         }`;
-        const user = `Analyze: Question "${cast.question}", Arudha ${cast.arudha}, Lagna ${JSON.stringify(cast.janma_lagna)}, Planets ${JSON.stringify(cast.transit_planets)}.`;
+        
+        let historyStr = "";
+        if (history && history.length > 0) {
+            historyStr = "\n--- SESSION MEMORY (RECENT INQUIRIES) ---\n" + 
+                history.map((h: any) => `
+TIME: ${h.time_ago}
+QUERY: ${h.question}
+TECHNICAL ANALYSIS GIVEN: ${h.technical_summary || "N/A"}
+FINAL PREDICTION GIVEN: ${h.spiritual_prediction || "N/A"}
+------------------------------------------`).join("\n") + "\n";
+        }
+
+        const user = `Analyze: Question "${cast.question}", Cast: ${JSON.stringify(cast)}.${historyStr}`;
         return new Response(JSON.stringify(await callAI(system, user)), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (url.pathname.includes("/interpret/advice")) {
-        const { cast, structure } = body;
+        const { cast, structure, history } = body;
         const system = `You are a Vedic Guru. You MUST return JSON. Use ${lang}.
         Schema: {
           "counsel_title": "string",
@@ -213,7 +237,19 @@ Deno.serve(async (req) => {
           "specific_remedies": [ "string" ],
           "final_prediction": "string"
         }`;
-        const user = `Advice for: "${cast.question}". Technical context: ${JSON.stringify(structure)}.`;
+
+        let historyStr = "";
+        if (history && history.length > 0) {
+            historyStr = "\n--- SESSION MEMORY (RECENT INQUIRIES) ---\n" + 
+                history.map((h: any) => `
+TIME: ${h.time_ago}
+QUERY: ${h.question}
+TECHNICAL ANALYSIS GIVEN: ${h.technical_summary || "N/A"}
+FINAL PREDICTION GIVEN: ${h.spiritual_prediction || "N/A"}
+------------------------------------------`).join("\n") + "\n";
+        }
+
+        const user = `Advice for: "${cast.question}". Technical context: ${JSON.stringify(structure)}.${historyStr}`;
         return new Response(JSON.stringify(await callAI(system, user)), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
