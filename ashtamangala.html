@@ -3,75 +3,336 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#120a06">
+    <meta name="description" content="Rishi Ashtamangala Prasna - Sacred Vedic Astrology Reading">
     <title>Rishi Ashtamangala Prasna</title>
     <style>
+        /* ========================================
+           CSS VARIABLES - PRASNA TRADITION COLORS
+           ======================================== */
         :root {
-            --gold: #d4af37;
-            --deep-red: #4a0404;
+            /* Core Prasna Colors - Enhanced for Readability */
+            --gold: #e4c44a;
+            --gold-bright: #ffe066;
+            --gold-dark: #9a7b2c;
+            --deep-red: #5a0808;
+            --deep-red-light: #7b1818;
             --saffron: #f4c430;
-            --dark-bg: #120a06;
-            --card-bg: #1c110a;
-            --text: #f0e6d2;
-            --accent: #8b4513;
+            --saffron-light: #f9d866;
+
+            /* Element Colors (Tattvas) - WCAG AA Compliant */
+            --earth: #e6b84d;
+            --water: #d0d0d0;
+            --fire: #ff6b35;
+            --air: #5a9fd4;
+            --spirit: #6b2c91;
+
+            /* Background Colors - Better Contrast */
+            --dark-bg: #0d0805;
+            --card-bg: #1e1510;
+            --card-bg-light: #2d2018;
+            --card-bg-hover: #3a2820;
+
+            /* Text Colors - WCAG AA Compliant (4.5:1 minimum) */
+            --text: #f8f4ed;
+            --text-muted: #d4c9b0;
+            --text-bright: #ffffff;
+            --text-dark: #1a0f0a;
+
+            /* Accent Colors */
+            --accent: #a0522d;
+            --accent-light: #cd853f;
+            --accent-hover: #d2691e;
+
+            /* House Status Colors - Enhanced for Clarity */
+            --house-active: rgba(228, 196, 74, 0.4);
+            --house-planet: rgba(255, 215, 100, 0.5);
+            --house-lagna: rgba(80, 220, 100, 0.35);
+            --house-arudha: rgba(255, 215, 0, 0.6);
+            --house-up-dominant: rgba(180, 140, 60, 0.5);
+            --house-dn-dominant: rgba(100, 80, 60, 0.5);
+
+            /* Success/Warning/Error - Accessible Colors */
+            --success: #5cb85c;
+            --warning: #f0ad4e;
+            --error: #d9534f;
+            --info: #5bc0de;
+
+            /* Accessibility */
+            --focus-ring: 0 0 0 4px rgba(228, 196, 74, 0.7);
+            --focus-ring-offset: 0 0 0 2px var(--dark-bg);
+            --font-scale: 1;
+            --line-height: 1.7;
+            --letter-spacing: 0.01em;
+
+            /* Touch Targets */
+            --min-touch-target: 48px;
+
+            /* Shadows for Depth */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+            --shadow-gold: 0 4px 20px rgba(228, 196, 74, 0.15);
+        }
+
+        /* ========================================
+           ACCESSIBILITY MODES
+           ======================================== */
+
+        /* High Contrast Mode - Maximum Readability */
+        [data-contrast="high"] {
+            --text: #ffffff;
+            --text-muted: #f0f0f0;
+            --text-bright: #ffffff;
+            --card-bg: #000000;
+            --card-bg-light: #1a1a1a;
+            --dark-bg: #000000;
+            --gold: #ffff00;
+            --gold-bright: #ffff99;
+            --accent: #ff9933;
+            --accent-light: #ffb366;
+            --house-active: rgba(255, 255, 0, 0.5);
+            --house-planet: rgba(255, 255, 100, 0.6);
+            --house-lagna: rgba(100, 255, 100, 0.5);
+            --house-arudha: rgba(255, 255, 0, 0.7);
+        }
+
+        /* Color Blind Friendly Mode */
+        [data-color-mode="blind"] {
+            --house-active: rgba(200, 200, 200, 0.5);
+            --house-planet: rgba(100, 200, 255, 0.5);
+            --house-lagna: rgba(100, 255, 100, 0.4);
+            --house-arudha: rgba(255, 200, 100, 0.5);
+            --gold: #e0e0e0;
+            --saffron: #c0c0c0;
+        }
+
+        /* Reduced Motion */
+        [data-motion="reduced"] * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+
+        /* Wide Text Spacing Mode */
+        [data-spacing="wide"] {
+            --line-height: 2;
+            --letter-spacing: 0.05em;
+        }
+
+        /* Large Text Mode */
+        [data-text-size="large"] {
+            --font-scale: 1.25;
+        }
+
+        /* Extra Large Text Mode */
+        [data-text-size="xlarge"] {
+            --font-scale: 1.5;
         }
 
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: calc(16px * var(--font-scale));
+            line-height: var(--line-height);
+            letter-spacing: var(--letter-spacing, 0.01em);
+            scroll-behavior: smooth;
         }
 
         body {
             background-color: var(--dark-bg);
             color: var(--text);
-            font-family: 'Palatino', serif;
+            font-family: 'Palatino', 'Georgia', 'Times New Roman', serif;
             margin: 0;
             overflow-x: hidden;
             min-height: 100vh;
-            background-image: radial-gradient(circle at center, #2a1810 0%, #120a06 100%);
+            background-image: radial-gradient(ellipse at center, var(--card-bg-light) 0%, var(--dark-bg) 70%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-weight: 400;
+        }
+
+        /* Enhanced Focus styles for accessibility */
+        *:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring), var(--focus-ring-offset);
+            border-radius: 4px;
+        }
+
+        /* Skip links for keyboard navigation */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold);
+            color: var(--deep-red);
+            padding: 12px 24px;
+            z-index: 10000;
+            transition: top 0.3s ease;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .skip-link:focus {
+            top: 0;
         }
 
         #main-app {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px;
+            padding: 12px;
             transition: filter 0.8s ease, opacity 0.8s ease;
+            max-width: 100vw;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
         }
 
         h1 {
             color: var(--gold);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 15px 0;
-            border-bottom: 2px solid var(--gold);
-            padding-bottom: 5px;
-            font-size: 1.3rem;
+            letter-spacing: 4px;
+            margin: 20px 0;
+            border-bottom: 3px solid var(--gold);
+            padding-bottom: 10px;
+            font-size: clamp(1.2rem, 4.5vw, 1.6rem);
             text-align: center;
+            max-width: 95vw;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            font-weight: 600;
+        }
+
+        /* ========================================
+           ACCESSIBILITY CONTROLS - Enhanced
+           ======================================== */
+        .accessibility-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            padding: 14px;
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .accessibility-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--accent);
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            min-height: var(--min-touch-target);
+            min-width: var(--min-touch-target);
+            touch-action: manipulation;
+            font-family: inherit;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .accessibility-btn:hover,
+        .accessibility-btn:focus {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(228, 196, 74, 0.1);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .accessibility-btn.active {
+            background: var(--gold);
+            color: var(--deep-red);
+            border-color: var(--gold);
+            font-weight: bold;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Accessibility Toggle Groups */
+        .accessibility-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid var(--accent);
+        }
+
+        .accessibility-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .top-controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            width: 100%;
+            max-width: 700px;
+            padding: 0 12px;
         }
 
         .lang-btn,
         .action-btn {
             background: transparent;
             color: var(--gold);
-            border: 1px solid var(--gold);
-            padding: 4px 8px;
+            border: 2px solid var(--gold);
+            padding: 12px 16px;
             cursor: pointer;
-            font-size: 0.65rem;
-            border-radius: 4px;
-            transition: 0.3s;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            min-height: var(--min-touch-target);
+            min-width: var(--min-touch-target);
+            touch-action: manipulation;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+        }
+
+        .lang-btn {
+            min-width: 60px;
+        }
+
+        .lang-btn:hover,
+        .action-btn:hover,
+        .lang-btn:focus,
+        .action-btn:focus {
+            background: rgba(228, 196, 74, 0.15);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+            border-color: var(--gold-bright);
         }
 
         .active {
             background: var(--gold) !important;
             color: var(--deep-red) !important;
+            font-weight: bold;
+            box-shadow: var(--shadow-sm);
         }
 
         .container {
@@ -80,175 +341,607 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+            padding: 0 10px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 0 5px;
+            }
+
+            .input-group {
+                padding: 0 5px !important;
             }
         }
 
+        /* ========================================
+           COLLAPSIBLE SECTIONS - Enhanced with Hide/Show
+           ======================================== */
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 12px 16px;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            user-select: none;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+
+        .collapsible-header:hover,
+        .collapsible-header:focus {
+            border-color: var(--gold);
+            background: var(--card-bg-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .collapsible-title {
+            color: var(--saffron-light);
+            font-size: clamp(0.9rem, 3vw, 1.05rem);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .collapsible-arrow {
+            font-size: 1.3rem;
+            color: var(--gold);
+            transition: transform 0.3s ease;
+            padding: 6px;
+            border-radius: 4px;
+        }
+
+        /* Hide arrow option */
+        [data-hide-arrows="true"] .collapsible-arrow {
+            display: none;
+        }
+
+        .collapsible-arrow.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+            max-height: 3000px;
+            opacity: 1;
+            padding: 0 4px;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+        }
+
+        /* Section visibility toggle */
+        .section-visibility-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .section-visibility-control:hover {
+            background: rgba(228, 196, 74, 0.1);
+            color: var(--gold);
+        }
+
+        .section-visibility-control input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--gold);
+        }
+
+        /* Hidden sections */
+        .section-hidden {
+            display: none !important;
+        }
+
+        /* ========================================
+           CARDS - Enhanced
+           ======================================== */
         .card {
             background: var(--card-bg);
-            border: 1px solid var(--accent);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            margin-bottom: 10px;
+            border: 2px solid var(--accent);
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-light);
+            box-shadow: var(--shadow-gold), var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card:focus-within {
+            border-color: var(--gold);
+            box-shadow: var(--focus-ring), var(--shadow-lg);
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 16px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+            }
         }
 
         .full-width {
             grid-column: 1 / -1;
         }
 
+        .chart-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* ========================================
+           CHART LEGEND - Enhanced for Accessibility
+           ======================================== */
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 16px;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .legend-item:hover {
+            background: rgba(228, 196, 74, 0.1);
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid var(--gold);
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Enhanced House Legend Items */
+        .legend-lagna {
+            background: var(--house-lagna);
+        }
+
+        .legend-arudha {
+            background: var(--house-arudha);
+        }
+
+        .legend-planet {
+            background: var(--house-planet);
+        }
+
+        .legend-up {
+            background: var(--house-up-dominant);
+        }
+
+        .legend-dn {
+            background: var(--house-dn-dominant);
+        }
+
+        .legend-active {
+            background: var(--house-active);
+        }
+
+        /* Chart Description for Screen Readers */
+        .chart-description {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         canvas {
             background: #050505;
-            border: 3px double var(--gold);
-            border-radius: 8px;
+            border: 4px double var(--gold);
+            border-radius: 10px;
             display: block;
             margin: 0 auto;
             max-width: 100%;
             height: auto;
+            touch-action: pan-y;
+            box-shadow: var(--shadow-lg);
+        }
+
+        @media (max-width: 480px) {
+            canvas {
+                border-width: 3px;
+                border-radius: 8px;
+            }
+        }
+
+        /* Canvas Tooltip for Accessibility */
+        .canvas-tooltip {
+            position: absolute;
+            background: var(--card-bg);
+            border: 2px solid var(--gold);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text);
+            pointer-events: none;
+            z-index: 5000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            max-width: 200px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .canvas-tooltip.visible {
+            opacity: 1;
         }
 
         input {
             width: 100%;
-            padding: 8px;
+            padding: 16px 12px;
             background: #0a0a0a;
-            border: 1px solid var(--accent);
-            color: white;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
+            border: 2px solid var(--accent);
+            color: var(--text-bright);
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-size: 16px;
             text-align: center;
+            min-height: var(--min-touch-target);
+            touch-action: manipulation;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(228, 196, 74, 0.25);
+            background: #0f0f0f;
+        }
+
+        input:hover {
+            border-color: var(--accent-light);
+        }
+
+        input::placeholder {
+            color: #777;
+            font-style: italic;
+        }
+
+        /* Label styling for better accessibility */
+        label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
         button.main-btn {
-            background: var(--deep-red);
+            background: linear-gradient(135deg, var(--deep-red) 0%, var(--deep-red-light) 100%);
             color: var(--gold);
-            border: 1px solid var(--gold);
-            padding: 12px;
+            border: 2px solid var(--gold);
+            padding: 20px 18px;
             cursor: pointer;
             text-transform: uppercase;
             width: 100%;
-            border-radius: 4px;
-            font-size: 0.9rem;
+            border-radius: 8px;
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
             font-weight: bold;
+            min-height: 64px;
+            letter-spacing: 1.5px;
+            touch-action: manipulation;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow-md), 0 4px 15px rgba(0, 0, 0, 0.4);
+            font-family: inherit;
         }
 
-        /* Response Styles */
+        button.main-btn:hover,
+        button.main-btn:focus {
+            background: linear-gradient(135deg, var(--deep-red-light) 0%, var(--deep-red) 100%);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-gold), var(--shadow-lg);
+            border-color: var(--gold-bright);
+        }
+
+        button.main-btn:active {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .export-btn {
+            background: rgba(228, 196, 74, 0.15) !important;
+            color: var(--gold) !important;
+            border: 2px solid var(--gold) !important;
+            padding: 14px 20px !important;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem) !important;
+            min-height: var(--min-touch-target) !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .export-btn:hover,
+        .export-btn:focus {
+            background: rgba(228, 196, 74, 0.3) !important;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* Export format buttons */
+        .export-format-btn {
+            transition: all 0.2s ease;
+            font-family: inherit;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .export-format-btn:hover {
+            border-color: var(--gold) !important;
+            color: var(--gold) !important;
+            transform: translateY(-1px);
+        }
+
+        .export-format-btn.active {
+            background: rgba(228, 196, 74, 0.25) !important;
+            border-color: var(--gold) !important;
+            color: var(--gold) !important;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(228, 196, 74, 0.2);
+        }
+
+        /* Status buttons with icons */
+        .status-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(228, 196, 74, 0.1);
+        }
+
+        .status-btn.active {
+            background: var(--gold);
+            color: var(--deep-red);
+            border-color: var(--gold);
+        }
+
+        /* ========================================
+           NARRATIVE SECTIONS - ENHANCED READABILITY
+           ======================================== */
         .narrative-section {
-            margin-bottom: 30px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-            padding-bottom: 15px;
+            margin-bottom: 32px;
+            border-bottom: 2px solid rgba(228, 196, 74, 0.2);
+            padding-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .narrative-section:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 480px) {
+            .narrative-section {
+                margin-bottom: 28px;
+                padding-bottom: 20px;
+            }
         }
 
         .narrative-title {
-            color: var(--saffron);
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 15px;
+            color: var(--saffron-light);
+            font-size: clamp(1.1rem, 4vw, 1.35rem);
+            font-weight: 700;
+            margin-bottom: 16px;
             display: block;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             text-align: center;
+            line-height: 1.5;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+            padding: 0 10px;
         }
 
         .text-technical {
             font-style: italic;
-            color: #fff;
-            margin-bottom: 10px;
-            line-height: 1.6;
-            font-size: 1.05rem;
+            color: var(--text-bright);
+            margin-bottom: 16px;
+            line-height: 1.9;
+            font-size: clamp(1.05rem, 3.5vw, 1.15rem);
+            word-wrap: break-word;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border-radius: 8px;
+            border-left: 4px solid var(--gold);
+            box-shadow: var(--shadow-sm);
         }
 
         .text-colloquial {
-            color: #d1c7b7;
-            line-height: 1.5;
-            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.9;
+            font-size: clamp(1rem, 3.5vw, 1.1rem);
+            word-wrap: break-word;
+            padding: 12px 0;
         }
 
         .insight-box {
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid var(--gold);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+            background: linear-gradient(135deg, rgba(228, 196, 74, 0.15) 0%, rgba(139, 69, 19, 0.1) 100%);
+            border: 3px solid var(--gold);
+            padding: 22px;
+            border-radius: 12px;
+            margin-top: 28px;
             font-style: italic;
-            color: var(--gold);
+            color: var(--gold-bright);
+            font-size: clamp(1rem, 3.5vw, 1.1rem);
+            line-height: 1.8;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .insight-box strong {
+            color: var(--saffron-light);
+            font-weight: 700;
         }
 
         .remedy-item {
-            margin-bottom: 8px;
-            color: var(--saffron);
-            font-weight: bold;
+            margin-bottom: 14px;
+            color: var(--saffron-light);
+            font-weight: 600;
+            font-size: clamp(1rem, 3.5vw, 1.1rem);
+            line-height: 1.6;
+            padding-left: 12px;
+            border-left: 4px solid var(--saffron);
         }
 
-        /* --- MEDITATION OVERLAY (Tattva Animation) --- */
+        /* Reading mode styles */
+        [data-reading-mode="focused"] .narrative-section {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        [data-reading-mode="focused"] .text-technical {
+            background: rgba(228, 196, 74, 0.08);
+        }
+
+        /* ========================================
+           OVERLAYS - Enhanced Accessibility
+           ======================================== */
         #meditation-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(18, 10, 6, 0.98);
-            z-index: 2000;
+            background: rgba(10, 5, 3, 0.98);
+            z-index: 8000;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 24px;
         }
 
         .om-symbol {
-            font-size: 10rem;
+            font-size: clamp(6rem, 22vw, 12rem);
             color: var(--gold);
-            text-shadow: 0 0 50px rgba(212, 175, 55, 0.6);
-            margin-bottom: 20px;
+            text-shadow: 0 0 80px rgba(228, 196, 74, 0.8);
+            margin-bottom: 40px;
             animation: pulse-glow 4s infinite ease-in-out;
             user-select: none;
-            z-index: 2005;
+            z-index: 8001;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
         }
 
         .tattva-symbol {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            opacity: 0.8;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-            z-index: 2004;
+            width: clamp(28px, 7vw, 40px);
+            height: clamp(28px, 7vw, 40px);
+            opacity: 0.9;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+            z-index: 8004;
         }
 
-        /* Earth: Yellow Square */
         .t-earth {
-            background: #f4c430;
+            background: var(--earth);
         }
 
-        /* Water: Silver Crescent */
         .t-water {
-            background: #c0c0c0;
+            background: var(--water);
             border-radius: 50% 50% 0 0;
-            height: 15px;
+            height: 20px;
         }
 
-        /* Fire: Red Triangle */
         .t-fire {
             width: 0;
             height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 30px solid #ff4500;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid var(--fire);
             background: none;
         }
 
-        /* Air: Blue Circle */
         .t-air {
-            background: #4682b4;
+            background: var(--air);
             border-radius: 50%;
         }
 
-        /* Spirit: Indigo Egg */
         .t-spirit {
-            background: #4b0082;
+            background: var(--spirit);
             border-radius: 50% / 70%;
         }
 
@@ -256,35 +949,49 @@
             color: var(--gold);
             font-family: serif;
             font-style: italic;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             margin-top: 80px;
             text-align: center;
-            font-size: 1.2rem;
-            z-index: 2006;
+            font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+            max-width: 90vw;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            z-index: 8001;
         }
 
-        /* --- WAITING OVERLAY (Point Animation) --- */
         #waiting-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(18, 10, 6, 0.8);
-            backdrop-filter: blur(15px);
-            z-index: 1900;
+            background: rgba(10, 5, 3, 0.88);
+            backdrop-filter: blur(20px);
+            z-index: 7000;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 24px;
+        }
+
+        #waiting-msg {
+            margin-top: 140px;
+            color: var(--saffron-light);
+            font-family: serif;
+            font-style: italic;
+            font-size: clamp(1.1rem, 4.5vw, 1.3rem);
+            text-align: center;
+            max-width: 90vw;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
 
         .golden-point {
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             background: var(--gold);
             border-radius: 50%;
-            box-shadow: 0 0 20px 5px var(--gold);
+            box-shadow: 0 0 30px 10px var(--gold);
             position: absolute;
         }
 
@@ -294,22 +1001,153 @@
             pointer-events: none;
         }
 
-        /* History & Modals */
+        /* Skip meditation button for accessibility */
+        .skip-meditation-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .skip-meditation-btn:hover,
+        .skip-meditation-btn:focus {
+            opacity: 1;
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Translation Overlay */
+        #translation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 5, 3, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 6000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .translation-spinner {
+            width: 70px;
+            height: 70px;
+            border: 4px solid rgba(212, 175, 55, 0.25);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: translate-spin 1s linear infinite;
+            position: relative;
+        }
+
+        .translation-spinner::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(244, 196, 48, 0.25);
+            border-top-color: var(--saffron);
+            border-radius: 50%;
+            animation: translate-spin 0.8s linear infinite reverse;
+        }
+
+        .translation-spinner::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(212, 175, 55, 0.25);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: translate-spin 0.6s linear infinite;
+        }
+
+        @keyframes translate-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #translation-text {
+            color: var(--gold);
+            font-family: serif;
+            font-style: italic;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            margin-top: 35px;
+            letter-spacing: 2px;
+            animation: translate-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes translate-pulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .translating .narrative-section,
+        .translating .insight-box {
+            filter: blur(4px);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        /* ========================================
+           HISTORY & MODALS - Enhanced
+           ======================================== */
         #history-explorer {
-            margin-top: 30px;
+            margin-top: 36px;
             width: 100%;
             max-width: 1000px;
             display: none;
+            padding: 0 12px;
         }
 
         .history-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid var(--accent);
+            background: rgba(255, 255, 255, 0.06);
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            border: 2px solid var(--accent);
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
+            line-height: 1.6;
+            touch-action: manipulation;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover,
+        .history-item:focus {
+            background: rgba(228, 196, 74, 0.1);
+            border-color: var(--gold);
+            transform: translateX(6px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .history-item:active {
+            background: rgba(228, 196, 74, 0.18);
+            border-color: var(--gold-bright);
         }
 
         .modal {
@@ -318,33 +1156,344 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.94);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 3000;
-            padding: 20px;
+            z-index: 9000;
+            padding: 16px;
         }
 
         .modal-content {
             background: var(--card-bg);
-            border: 2px solid var(--gold);
-            border-radius: 12px;
+            border: 3px solid var(--gold);
+            border-radius: 14px;
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 20px;
+            padding: 28px;
+            margin: 16px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9);
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 20px;
+                margin: 8px;
+                border-radius: 12px;
+            }
+        }
+
+        /* ========================================
+           TOAST NOTIFICATIONS - Enhanced
+           ======================================== */
+        #toast-container {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            pointer-events: none;
+            width: 94%;
+            max-width: 500px;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border: 3px solid var(--gold);
+            color: var(--text);
+            padding: 18px 28px;
+            border-radius: 12px;
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+            color: #a5d6a7;
+        }
+
+        .toast.info {
+            border-color: var(--info);
+            color: #90caf9;
+        }
+
+        .toast.warning {
+            border-color: var(--warning);
+            color: #ffcc80;
+        }
+
+        .toast.error {
+            border-color: var(--error);
+            color: #ef9a9a;
+        }
+
+        /* ========================================
+           INPUT CARDS - Enhanced
+           ======================================== */
+        .input-card {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .input-card:hover {
+            border-color: var(--accent-light);
+        }
+
+        .input-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: var(--deep-red);
+            font-size: 14px;
+            font-weight: bold;
+            cursor: help;
+            position: relative;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(228, 196, 74, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .info-icon:hover,
+        .info-icon:focus {
+            transform: scale(1.15);
+            box-shadow: 0 4px 15px rgba(228, 196, 74, 0.5);
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            border: 2px solid var(--gold);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: var(--text);
+            width: min(300px, 90vw);
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+            z-index: 5000;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-lg);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 480px) {
+            .tooltip {
+                font-size: 0.85rem;
+                padding: 14px;
+            }
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 10px solid transparent;
+            border-top-color: var(--gold);
+        }
+
+        .info-icon:hover .tooltip,
+        .info-icon:focus .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .panel-label {
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            margin: 0;
+            color: var(--gold);
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .panel-subtitle {
+            font-size: clamp(0.65rem, 2.5vw, 0.8rem);
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 6px;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .optional-badge {
+            display: inline-block;
+            font-size: clamp(0.6rem, 2vw, 0.7rem);
+            padding: 5px 12px;
+            background: rgba(228, 196, 74, 0.2);
+            border: 1px solid var(--gold);
+            border-radius: 14px;
+            color: var(--gold);
+            margin-left: 8px;
+            flex-shrink: 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Translation loading indicator */
+        .translating-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(0.6rem, 2vw, 0.7rem);
+            color: var(--saffron);
+            margin-left: 10px;
+        }
+
+        .translating-indicator.hidden {
+            display: none;
+        }
+
+        .spinner-mini {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--saffron);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        /* Mobile-specific */
+        @media (max-width: 480px) {
+            .input-panels-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+
+            .input-panels-grid .card {
+                margin-bottom: 0;
+            }
+
+            .lang-selector {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .top-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .top-controls>div {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Results section */
+        #results .card {
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 480px) {
+            #results .card {
+                padding: 14px;
+            }
+
+            #struct-title,
+            #advice-title {
+                font-size: clamp(1.1rem, 4vw, 1.3rem) !important;
+            }
+        }
+
+        /* Memory input */
+        #memoryMins {
+            width: 60px !important;
+            min-height: 36px;
+            padding: 6px !important;
+            font-weight: bold;
+        }
+
+        input[type="datetime-local"] {
+            font-size: 14px;
+        }
+
+        .action-btn {
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
     </style>
-    <script src="config.js"></script>
+    <script src="config.js?v=2"></script>
 </head>
 
 <body>
+    <a href="#main-app" class="skip-link">Skip to main content</a>
 
-    <div id="meditation-overlay">
-        <div class="om-symbol">ॐ</div>
-        <div id="tattva-container" style="position:absolute; width: 100vw; height: 100vh; overflow:hidden;">
+    <div id="meditation-overlay" role="dialog" aria-label="Meditation" aria-live="polite">
+        <div class="om-symbol" aria-hidden="true">ॐ</div>
+        <div id="tattva-container" style="position:absolute; width: 100vw; height: 100vh; overflow:hidden;"
+            aria-hidden="true">
             <div class="tattva-symbol t-earth" id="t1"></div>
             <div class="tattva-symbol t-water" id="t2"></div>
             <div class="tattva-symbol t-fire" id="t3"></div>
@@ -352,211 +1501,1593 @@
             <div class="tattva-symbol t-spirit" id="t5"></div>
         </div>
         <div id="meditation-status">Aligning with the Tattvas...</div>
+        <button class="skip-meditation-btn" onclick="skipMeditation()" aria-label="Skip meditation animation">
+            Skip Animation
+        </button>
     </div>
 
-    <div id="waiting-overlay">
-        <div class="golden-point" id="sacred-point"></div>
-        <div style="margin-top:100px; color:var(--saffron); font-family:serif; font-style:italic;">Scanning the
-            celestial loom...</div>
+    <div id="waiting-overlay" role="dialog" aria-label="Loading">
+        <div class="golden-point" id="sacred-point" aria-hidden="true"></div>
+        <div id="waiting-msg">Scanning the celestial loom...</div>
     </div>
 
-    <div id="main-app">
-        <h1>Rishi Ashtamangala</h1>
+    <div id="main-app" role="main">
+        <h1 id="main-title">Rishi Ashtamangala</h1>
 
-        <div class="top-controls">
-            <div class="lang-selector">
-                <button class="lang-btn active" id="btn-en" onclick="setLang('en')">ENG</button>
-                <button class="lang-btn" id="btn-es" onclick="setLang('es')">ESP</button>
-                <button class="lang-btn" id="btn-it" onclick="setLang('it')">ITA</button>
+        <!-- Accessibility Controls - Enhanced -->
+        <div class="accessibility-bar" role="toolbar" aria-label="Accessibility options">
+            <!-- Font Size Controls -->
+            <div class="accessibility-group" role="group" aria-label="Text size options">
+                <span class="accessibility-label">Text:</span>
+                <button class="accessibility-btn" id="btn-font-small" onclick="setFontSize(0.9)" title="Smaller text"
+                    aria-label="Decrease text size">A-</button>
+                <button class="accessibility-btn active" id="btn-font-normal" onclick="setFontSize(1)"
+                    title="Normal text" aria-label="Normal text size">A</button>
+                <button class="accessibility-btn" id="btn-font-large" onclick="setFontSize(1.25)" title="Large text"
+                    aria-label="Increase text size">A+</button>
+                <button class="accessibility-btn" id="btn-font-xlarge" onclick="setFontSize(1.5)"
+                    title="Extra large text" aria-label="Extra large text size">A++</button>
             </div>
-            <button class="action-btn" onclick="toggleExplorer()">📜 History</button>
-            <div style="display:flex; align-items:center; gap:5px; font-size:0.65rem;">
-                <span>Memory (min):</span>
-                <input type="number" id="memoryMins" value="30" style="width:40px; margin:0; padding:2px;">
+
+            <!-- Visual Controls -->
+            <div class="accessibility-group" role="group" aria-label="Visual display options">
+                <span class="accessibility-label">Visual:</span>
+                <button class="accessibility-btn" id="btn-contrast" onclick="toggleHighContrast()"
+                    title="Toggle high contrast mode" aria-label="Toggle high contrast">🔲</button>
+                <button class="accessibility-btn" id="btn-colorblind" onclick="toggleColorBlindMode()"
+                    title="Color blind friendly mode" aria-label="Toggle color blind mode">👁️</button>
+                <button class="accessibility-btn" id="btn-spacing" onclick="toggleWideSpacing()"
+                    title="Wide text spacing" aria-label="Toggle wide spacing">↔️</button>
+            </div>
+
+            <!-- Motion Controls -->
+            <div class="accessibility-group" role="group" aria-label="Animation options">
+                <span class="accessibility-label">Motion:</span>
+                <button class="accessibility-btn" id="btn-motion" onclick="toggleReducedMotion()"
+                    title="Reduce animations" aria-label="Toggle reduced motion">✋</button>
+            </div>
+
+            <!-- Section Display Controls -->
+            <div class="accessibility-group" role="group" aria-label="Section display options">
+                <span class="accessibility-label">Display:</span>
+                <button class="accessibility-btn" id="btn-hide-arrows" onclick="toggleHideArrows()"
+                    title="Hide section arrows" aria-label="Toggle hide arrows">▼</button>
+                <button class="accessibility-btn" id="btn-reading-mode" onclick="toggleReadingMode()"
+                    title="Focused reading mode" aria-label="Toggle reading mode">📖</button>
             </div>
         </div>
 
-        <div class="input-group" style="width:100%; max-width:600px;">
-            <input type="text" id="userQuestion" placeholder="Enter your question for the Oracle...">
-            <div class="container" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
-                <div class="card" style="padding:10px;">
-                    <h3 style="font-size: 0.65rem; margin: 0 0 5px 0; color: var(--gold); text-align: center;">Janma
-                        (Birth)</h3>
-                    <input type="number" id="bLat" placeholder="Lat" step="any">
-                    <input type="number" id="bLon" placeholder="Lon" step="any">
-                    <input type="datetime-local" id="bTime">
-                </div>
-                <div class="card" style="padding:10px;">
-                    <h3 style="font-size: 0.65rem; margin: 0 0 5px 0; color: var(--gold); text-align: center;">Prasna
-                        (Current)</h3>
-                    <input type="number" id="pLat" placeholder="Lat" step="any">
-                    <input type="number" id="pLon" placeholder="Lon" step="any">
-                    <button class="action-btn" onclick="useMyLocation()" style="width: 100%; margin-top: 5px;">📍 Detect
-                        Geo</button>
+        <div class="top-controls" role="toolbar" aria-label="Main controls">
+            <div class="lang-selector" role="group" aria-label="Language selection">
+                <button class="lang-btn active" id="btn-en" onclick="setLang('en')" aria-label="English">ENG</button>
+                <button class="lang-btn" id="btn-es" onclick="setLang('es')" aria-label="Español">ESP</button>
+                <button class="lang-btn" id="btn-it" onclick="setLang('it')" aria-label="Italiano">ITA</button>
+                <span id="translating-indicator" class="translating-indicator hidden" aria-live="polite">
+                    <span class="spinner-mini" aria-hidden="true"></span>
+                    <span id="translating-text">Translating...</span>
+                </span>
+            </div>
+            <button class="action-btn" id="btn-history" onclick="toggleExplorer()">📜 History</button>
+            <button class="action-btn" id="btn-clear-history-top" onclick="clearHistory()"
+                style="color:#ff6b6b; border-color:#ff6b6b;">🗑️ Clear History</button>
+            <button class="action-btn" id="btn-clear-memory" onclick="clearMemory()"
+                style="color:var(--saffron); border-color:var(--saffron);">🧹 Clear Memory</button>
+            <div style="display:flex; align-items:center; gap:8px; font-size:0.75rem;">
+                <span id="lbl-memory">Memory (min):</span>
+                <input type="number" id="memoryMins" value="30" min="1" max="1440" aria-label="Memory time in minutes">
+            </div>
+        </div>
+
+        <div class="input-group" style="width:100%; max-width:650px;">
+            <!-- Collapsible Query Section with Action -->
+            <div class="collapsible-header" onclick="toggleSection('query-section')" role="button" tabindex="0"
+                aria-expanded="true" aria-controls="query-section" id="header-query-section">
+                <span class="collapsible-title" id="lbl-query-title">
+                    <span class="section-icon" aria-hidden="true">🔮</span>
+                    <span class="section-text" data-i18n="queryTitle">Query</span>
+                </span>
+                <span class="collapsible-arrow" id="arrow-query-section" aria-hidden="true">▼</span>
+            </div>
+            <div id="query-section" class="collapsible-content" role="region" aria-labelledby="header-query-section">
+                <label for="userQuestion" id="lbl-question-input" class="sr-only">Enter your question for the
+                    Oracle</label>
+                <input type="text" id="userQuestion" placeholder="Enter your question for the Oracle..."
+                    autocomplete="off" aria-labelledby="lbl-question-input" aria-required="true">
+            </div>
+
+            <!-- Collapsible Input Panels with Action -->
+            <div class="collapsible-header" onclick="toggleSection('input-panels')" role="button" tabindex="0"
+                aria-expanded="true" aria-controls="input-panels" id="header-input-panels">
+                <span class="collapsible-title" id="lbl-inputs-title">
+                    <span class="section-icon" aria-hidden="true">📍</span>
+                    <span class="section-text" data-i18n="inputsTitle">Birth & Current Location</span>
+                </span>
+                <span class="collapsible-arrow" id="arrow-input-panels" aria-hidden="true">▼</span>
+            </div>
+            <div id="input-panels" class="collapsible-content" role="region" aria-labelledby="header-input-panels">
+                <div class="container input-panels-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
+                    <!-- Janma (Birth) Panel -->
+                    <div class="card input-card" style="padding:14px;">
+                        <div class="input-card-header">
+                            <h3 class="panel-label" id="lbl-birth">Janma (Birth Chart)</h3>
+                            <span class="optional-badge" id="lbl-optional">OPTIONAL</span>
+                            <span class="info-icon" role="img" aria-label="Information">i
+                                <span class="tooltip" id="tooltip-birth">
+                                    Your birth coordinates create the Lagna (Ascendant) - the soul's entry point into
+                                    this incarnation. This provides deeper karmic context but is not required for a
+                                    Prasna reading.
+                                </span>
+                            </span>
+                        </div>
+                        <p class="panel-subtitle" id="subtitle-birth">For enhanced karmic precision</p>
+                        <input type="number" id="bLat" placeholder="Latitude" step="any" inputmode="decimal"
+                            aria-label="Birth latitude">
+                        <input type="number" id="bLon" placeholder="Longitude" step="any" inputmode="decimal"
+                            aria-label="Birth longitude">
+                        <input type="datetime-local" id="bTime" aria-label="Birth date and time">
+                    </div>
+                    <!-- Prasna (Current) Panel -->
+                    <div class="card input-card" style="padding:14px;">
+                        <div class="input-card-header">
+                            <h3 class="panel-label" id="lbl-prasna">Prasna (Current Moment)</h3>
+                            <span class="optional-badge" id="lbl-optional2">OPTIONAL</span>
+                            <span class="info-icon" role="img" aria-label="Information">i
+                                <span class="tooltip" id="tooltip-prasna">
+                                    Current location enables transit analysis - showing where planets reside now
+                                    relative to your birth chart. Adds temporal precision to the reading.
+                                </span>
+                            </span>
+                        </div>
+                        <p class="panel-subtitle" id="subtitle-prasna">For planetary transit analysis</p>
+                        <input type="number" id="pLat" placeholder="Latitude" step="any" inputmode="decimal"
+                            aria-label="Current latitude">
+                        <input type="number" id="pLon" placeholder="Longitude" step="any" inputmode="decimal"
+                            aria-label="Current longitude">
+                        <button class="action-btn" id="btn-geo" onclick="useMyLocation()"
+                            style="width: 100%; margin-top: 5px; padding: 12px;" aria-label="Detect my location">📍
+                            Detect Geo</button>
+                    </div>
                 </div>
             </div>
-            <button class="main-btn" onclick="startRitual()">Invoke Sacred Ceremony</button>
+
+            <button class="main-btn" id="btn-ritual" onclick="startRitual()"
+                aria-label="Start the sacred ceremony">Invoke Sacred Ceremony</button>
         </div>
 
         <div class="container">
-            <div class="card full-width"><canvas id="chartCanvas" width="600" height="600"></canvas></div>
-            <div id="results" class="full-width" style="display:none;">
-                <div class="card">
-                    <h2 id="struct-title" style="color:var(--gold); text-align:center;"></h2>
-                    <div id="structure-content"></div>
+            <div class="card full-width chart-container">
+                <canvas id="chartCanvas" width="600" height="600" role="img"
+                    aria-label="Ashtamangala Prasna Chakra chart showing 12 houses with planetary positions"></canvas>
+                <div id="canvas-tooltip" class="canvas-tooltip" role="tooltip" aria-hidden="true"></div>
+
+                <!-- Chart Legend - Enhanced with House Colors -->
+                <div class="chart-legend" id="chart-legend" style="display:none;" role="group"
+                    aria-label="Chart legend">
+                    <div class="legend-item" title="House containing the Ascendant (Lagna)">
+                        <div class="legend-color legend-lagna"></div>
+                        <span data-i18n="houseLagna">Lagna (Ascendant)</span>
+                    </div>
+                    <div class="legend-item" title="Arudha Lagna house - the house of self-projection">
+                        <div class="legend-color legend-arudha"></div>
+                        <span data-i18n="houseArudha">Arudha</span>
+                    </div>
+                    <div class="legend-item" title="Houses with planetary presence">
+                        <div class="legend-color legend-planet"></div>
+                        <span data-i18n="housePlanet">Planet Present</span>
+                    </div>
+                    <div class="legend-item" title="Houses with dominant UP shells">
+                        <div class="legend-color legend-up"></div>
+                        <span data-i18n="houseUpDominant">Dominant UP</span>
+                    </div>
+                    <div class="legend-item" title="Houses with dominant DOWN shells">
+                        <div class="legend-color legend-dn"></div>
+                        <span data-i18n="houseDnDominant">Dominant DOWN</span>
+                    </div>
+                    <div class="legend-item" title="Active houses with shells">
+                        <div class="legend-color legend-active"></div>
+                        <span data-i18n="houseActive">Active House</span>
+                    </div>
                 </div>
+
+                <div class="chart-actions" id="chart-actions" style="display:none;">
+                    <button class="action-btn export-btn" onclick="exportChart()" aria-label="Export chart as image">
+                        📥 Export Chart
+                    </button>
+                </div>
+            </div>
+
+            <div id="results" class="full-width" style="display:none;" role="region" aria-label="Reading results">
+                <!-- Collapsible Structure Section -->
                 <div class="card">
-                    <h2 id="advice-title" style="color:var(--gold); text-align:center;"></h2>
-                    <div id="advice-content"></div>
+                    <div class="collapsible-header" onclick="toggleSection('structure-content')" role="button"
+                        tabindex="0" aria-expanded="true" aria-controls="structure-content"
+                        id="header-structure-content">
+                        <h2 id="struct-title"
+                            style="color:var(--gold); text-align:center; margin:0; font-size: clamp(1.1rem, 4vw, 1.3rem);">
+                        </h2>
+                        <span class="collapsible-arrow" id="arrow-structure-content" aria-hidden="true">▼</span>
+                    </div>
+                    <div id="structure-content" class="collapsible-content" role="region"
+                        aria-labelledby="header-structure-content"></div>
+                </div>
+
+                <!-- Collapsible Advice Section -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleSection('advice-content')" role="button" tabindex="0"
+                        aria-expanded="true" aria-controls="advice-content" id="header-advice-content">
+                        <h2 id="advice-title"
+                            style="color:var(--gold); text-align:center; margin:0; font-size: clamp(1.1rem, 4vw, 1.3rem);">
+                        </h2>
+                        <span class="collapsible-arrow" id="arrow-advice-content" aria-hidden="true">▼</span>
+                    </div>
+                    <div id="advice-content" class="collapsible-content" role="region"
+                        aria-labelledby="header-advice-content"></div>
+                </div>
+
+                <!-- Export Interpretation Section -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="collapsible-header" onclick="toggleSection('export-content')" role="button" tabindex="0"
+                        aria-expanded="false" aria-controls="export-content" id="header-export-content">
+                        <h2
+                            style="color:var(--gold); text-align:center; margin:0; font-size: clamp(1rem, 3.5vw, 1.2rem);">
+                            <span aria-hidden="true">📄</span> <span data-i18n="exportReading">Export Reading</span>
+                        </h2>
+                        <span class="collapsible-arrow collapsed" id="arrow-export-content" aria-hidden="true">▼</span>
+                    </div>
+                    <div id="export-content" class="collapsible-content collapsed" role="region"
+                        aria-labelledby="header-export-content">
+                        <div style="padding: 20px;">
+                            <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem; text-align: center;"
+                                data-i18n="exportDescription">
+                                Download your complete reading with enhanced details and formatting
+                            </p>
+
+                            <!-- Export Format Selection -->
+                            <div style="margin-bottom: 20px;">
+                                <label
+                                    style="display: block; color: var(--saffron-light); margin-bottom: 10px; font-weight: 600;"
+                                    data-i18n="exportFormat">
+                                    Export Format:
+                                </label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                                    <button class="export-format-btn active" onclick="selectExportFormat('markdown')"
+                                        id="btn-export-md"
+                                        style="background: rgba(228,196,74,0.2); border: 2px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-family: inherit; min-height: 44px;">
+                                        📝 Markdown
+                                    </button>
+                                    <button class="export-format-btn" onclick="selectExportFormat('html')"
+                                        id="btn-export-html"
+                                        style="background: transparent; border: 1px solid var(--accent); color: var(--text-muted); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-family: inherit; min-height: 44px;">
+                                        🌐 HTML
+                                    </button>
+                                    <button class="export-format-btn" onclick="selectExportFormat('pdf')"
+                                        id="btn-export-pdf"
+                                        style="background: transparent; border: 1px solid var(--accent); color: var(--text-muted); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-family: inherit; min-height: 44px;">
+                                        📄 PDF Ready
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Export Option -->
+                            <div
+                                style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                <input type="checkbox" id="export-detailed" checked
+                                    style="width: 20px; height: 20px; accent-color: var(--gold); cursor: pointer;">
+                                <label for="export-detailed"
+                                    style="color: var(--text); cursor: pointer; font-size: 0.95rem;"
+                                    data-i18n="includeDetailedContext">
+                                    Include detailed astrological context
+                                </label>
+                            </div>
+
+                            <!-- Export Button -->
+                            <button onclick="exportInterpretation()" class="main-btn"
+                                style="margin-top: 10px; background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 100%); color: var(--deep-red);"
+                                data-i18n="exportNow">
+                                ✨ Export Reading Now
+                            </button>
+
+                            <p id="export-status"
+                                style="margin-top: 15px; font-size: 0.85rem; text-align: center; color: var(--text-muted); display: none;">
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="history-explorer">
-            <h2>Previous Consultations</h2>
-            <div id="history-list"></div>
-            <button class="action-btn" onclick="clearHistory()" style="margin-top:10px; color:red;">Clear
-                History</button>
+        <div id="history-explorer" aria-label="Previous consultations">
+            <div class="collapsible-header" onclick="toggleSection('history-list-container')" role="button" tabindex="0"
+                aria-expanded="true" aria-controls="history-list-container">
+                <h2 id="lbl-prev" style="font-size: clamp(1rem, 4vw, 1.2rem); margin:0;">Previous Consultations</h2>
+                <span class="collapsible-arrow" id="arrow-history-list-container">▼</span>
+            </div>
+            <div id="history-list-container" class="collapsible-content">
+                <div id="history-list"></div>
+                <button class="action-btn" id="btn-clear" onclick="clearHistory()"
+                    style="margin-top:12px; color:#ff6b6b; border-color:#ff6b6b;" aria-label="Clear all history">Clear
+                    History</button>
+            </div>
         </div>
     </div>
 
-    <div id="historyModal" class="modal" onclick="closeModal()">
+    <div id="historyModal" class="modal" onclick="closeModal()" role="dialog" aria-label="History details">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="action-btn" onclick="closeModal()" style="float:right">X</button>
-            <div id="modalBody"></div>
+            <button class="action-btn" onclick="closeModal()" style="float:right; min-width: 44px; min-height: 44px;"
+                aria-label="Close">✕</button>
+            <div id="modalBody" style="clear:both;"></div>
         </div>
     </div>
+
+    <div id="translation-overlay" role="dialog" aria-label="Translating">
+        <div class="translation-spinner" aria-hidden="true"></div>
+        <div id="translation-text">Translating...</div>
+    </div>
+
+    <div id="toast-container" role="region" aria-live="polite" aria-label="Notifications"></div>
 
     <script>
-        const API_BASE = window.APP_CONFIG.API_BASE_URL;
-        const canvas = document.getElementById('chartCanvas');
-        const ctx = canvas.getContext('2d');
-        const rashiSanskrit = ["Mesha", "Vrishabha", "Mithuna", "Karka", "Simha", "Kanya", "Thula", "Vrischika", "Dhanus", "Makara", "Kumbha", "Meena"];
-        const houseCoords = { 12: [0, 0], 1: [1, 0], 2: [2, 0], 3: [3, 0], 11: [0, 1], 4: [3, 1], 10: [0, 2], 5: [3, 2], 9: [0, 3], 8: [1, 3], 7: [2, 3], 6: [3, 3] };
 
+        // ========================================
+        // GLOBAL STATE & I18N - Enhanced
+        // ========================================
         let currentLang = 'en';
+        window.LAST_CAST = null;
+        window.CURRENT_INTERP = { structure: null, advice: null };
+        let isTranslating = false;
+
+        // Accessibility state
+        let fontSize = 1;
+        let highContrast = false;
+        let reducedMotion = false;
+        let colorBlindMode = false;
+        let wideSpacing = false;
+        let hideArrows = false;
+        let readingMode = false;
+        let skipMeditationFlag = false;
 
         const i18n = {
             en: {
-                up: "Upright", dn: "Reversed",
-                planets: { "Sun": "Surya", "Moon": "Chandra", "Mars": "Mangala", "Mercury": "Budha", "Jupiter": "Guru", "Venus": "Shukra", "Saturn": "Shani", "Rahu": "Rahu", "Ketu": "Ketu", "Uranus": "Indra" }
+                placeholder: "Enter your question for the Oracle...",
+                ritual: "Invoke Sacred Ceremony",
+                history: "📜 History",
+                memory: "Memory (min):",
+                birth: "Janma (Birth Chart)",
+                prasna: "Prasna (Current Moment)",
+                detect: "📍 Detect Geo",
+                prev: "Previous Consultations",
+                clear: "Clear History",
+                clearMemory: "Clear Memory",
+                queryTitle: "🔮 Query",
+                inputsTitle: "📍 Birth & Current Location",
+                up: "Upright",
+                dn: "Reversed",
+                waitMsg: "Scanning the celestial loom...",
+                medStatus: "Aligning with the Tattvas...",
+                export: "📥 Export Chart",
+                exportSuccess: "Chart exported successfully",
+                exportError: "Failed to export chart",
+                expand: "Expand section",
+                collapse: "Collapse section",
+                optional: "OPTIONAL",
+                subtitleBirth: "For enhanced karmic precision",
+                subtitlePrasna: "For planetary transit analysis",
+                tooltipBirth: "Your birth coordinates create the Lagna (Ascendant) - the soul's entry point into this incarnation. This provides deeper karmic context but is not required for a Prasna reading.",
+                tooltipPrasna: "Current location enables transit analysis - showing where planets reside now relative to your birth chart. Adds temporal precision to the reading.",
+                translating: "Translating...",
+                translatedSuccess: "Content translated successfully",
+                translationError: "Translation failed. Displaying original text.",
+                houseActive: "Active House",
+                housePlanet: "Planet Present",
+                houseLagna: "Lagna",
+                houseArudha: "Arudha",
+                planets: { "Sun": "Surya", "Moon": "Chandra", "Mars": "Mangala", "Mercury": "Budha", "Jupiter": "Guru", "Venus": "Shukra", "Saturn": "Shani", "Rahu": "Rahu", "Ketu": "Ketu", "Uranus": "Indra" },
+                // Accessibility strings
+                highContrastOn: "High contrast: ON",
+                highContrastOff: "High contrast: OFF",
+                colorBlindOn: "Color blind mode: ON",
+                colorBlindOff: "Color blind mode: OFF",
+                reducedMotionOn: "Reduced motion: ON",
+                reducedMotionOff: "Reduced motion: OFF",
+                wideSpacingOn: "Wide spacing: ON",
+                wideSpacingOff: "Wide spacing: OFF",
+                hideArrowsOn: "Section arrows: Hidden",
+                hideArrowsOff: "Section arrows: Visible",
+                readingModeOn: "Reading mode: Focused",
+                readingModeOff: "Reading mode: Normal",
+                meditationSkipped: "Meditation skipped",
+                houseUpDominant: "Dominant UP",
+                houseDnDominant: "Dominant DOWN",
+                // Export strings
+                exportReading: "Export Reading",
+                exportDescription: "Download your complete reading with enhanced details and formatting",
+                exportFormat: "Export Format:",
+                includeDetailedContext: "Include detailed astrological context",
+                exportNow: "✨ Export Reading Now",
+                noReadingToExport: "No reading available to export",
+                preparingExport: "Preparing your export..."
             },
             es: {
-                up: "Derecho", dn: "Invertido",
-                planets: { "Sun": "Surya", "Moon": "Chandra", "Mars": "Mangala", "Mercury": "Budha", "Jupiter": "Guru", "Venus": "Shukra", "Saturn": "Shani", "Rahu": "Rahu", "Ketu": "Ketu", "Uranus": "Indra" }
+                placeholder: "Escribe tu pregunta para el Oráculo...",
+                ritual: "Invocar Ceremonia Sagrada",
+                history: "📜 Historial",
+                memory: "Memoria (min):",
+                birth: "Janma (Carta Natal)",
+                prasna: "Prasna (Momento Actual)",
+                detect: "📍 Detectar Geo",
+                prev: "Consultas Previas",
+                clear: "Borrar Historial",
+                clearMemory: "Limpiar Memoria",
+                queryTitle: "🔮 Consulta",
+                inputsTitle: "📍 Nacimiento y Ubicación Actual",
+                up: "Derecho",
+                dn: "Invertido",
+                waitMsg: "Escaneando el telar celestial...",
+                medStatus: "Alineando con los Tattvas...",
+                export: "📥 Exportar Carta",
+                exportSuccess: "Carta exportada exitosamente",
+                exportError: "Error al exportar carta",
+                expand: "Expandir sección",
+                collapse: "Contraer sección",
+                optional: "OPCIONAL",
+                subtitleBirth: "Para precisión kármica mejorada",
+                subtitlePrasna: "Para análisis de tránsitos planetarios",
+                tooltipBirth: "Las coordenadas de tu nacimiento crean el Lagna (Ascendente) - el punto de entrada del alma en esta encarnación. Proporciona contexto kármico más profundo pero no es necesario para una lectura de Prasna.",
+                tooltipPrasna: "La ubicación actual permite el análisis de tránsitos - mostrando dónde residen los planetas ahora en relación con tu carta natal. Añade precisión temporal a la lectura.",
+                translating: "Traduciendo...",
+                translatedSuccess: "Contenido traducido exitosamente",
+                translationError: "Error al traducir. Mostrando texto original.",
+                houseActive: "Casa Activa",
+                housePlanet: "Planeta Presente",
+                houseLagna: "Lagna",
+                houseArudha: "Arudha",
+                planets: { "Sun": "Surya", "Moon": "Chandra", "Mars": "Mangala", "Mercury": "Budha", "Jupiter": "Guru", "Venus": "Shukra", "Saturn": "Shani", "Rahu": "Rahu", "Ketu": "Ketu", "Uranus": "Indra" },
+                // Accessibility strings
+                highContrastOn: "Alto contraste: ACTIVADO",
+                highContrastOff: "Alto contraste: DESACTIVADO",
+                colorBlindOn: "Modo daltónico: ACTIVADO",
+                colorBlindOff: "Modo daltónico: DESACTIVADO",
+                reducedMotionOn: "Movimiento reducido: ACTIVADO",
+                reducedMotionOff: "Movimiento reducido: DESACTIVADO",
+                wideSpacingOn: "Espaciado amplio: ACTIVADO",
+                wideSpacingOff: "Espaciado amplio: DESACTIVADO",
+                hideArrowsOn: "Flechas: Ocultas",
+                hideArrowsOff: "Flechas: Visibles",
+                readingModeOn: "Modo lectura: Enfocado",
+                readingModeOff: "Modo lectura: Normal",
+                meditationSkipped: "Meditación omitida",
+                houseUpDominant: "UP Dominante",
+                houseDnDominant: "DOWN Dominante",
+                // Export strings
+                exportReading: "Exportar Lectura",
+                exportDescription: "Descarga tu lectura completa con detalles y formato mejorados",
+                exportFormat: "Formato de Exportación:",
+                includeDetailedContext: "Incluir contexto astrológico detallado",
+                exportNow: "✨ Exportar Lectura Ahora",
+                noReadingToExport: "No hay lectura disponible para exportar",
+                preparingExport: "Preparando tu exportación..."
             },
             it: {
-                up: "Diritto", dn: "Rovescio",
-                planets: { "Sun": "Surya", "Moon": "Chandra", "Mars": "Mangala", "Mercury": "Budha", "Jupiter": "Guru", "Venus": "Shukra", "Saturn": "Shani", "Rahu": "Rahu", "Ketu": "Ketu", "Uranus": "Indra" }
+                placeholder: "Inserisci la tua domanda per l'Oracolo...",
+                ritual: "Invoca Cerimonia Sacra",
+                history: "📜 Cronologia",
+                memory: "Memoria (min):",
+                birth: "Janma (Tema Natale)",
+                prasna: "Prasna (Momento Attuale)",
+                detect: "📍 Rileva Geo",
+                prev: "Consultazioni Precedenti",
+                clear: "Cancella Cronologia",
+                clearMemory: "Cancella Memoria",
+                queryTitle: "🔮 Domanda",
+                inputsTitle: "📍 Nascita e Posizione Attuale",
+                up: "Diritto",
+                dn: "Rovescio",
+                waitMsg: "Scansionando il telaio celeste...",
+                medStatus: "Allineamento con i Tattva...",
+                export: "📥 Esporta Tema",
+                exportSuccess: "Tema esportato con successo",
+                exportError: "Errore nell'esportazione del tema",
+                expand: "Espandi sezione",
+                collapse: "Comprimi sezione",
+                optional: "OPZIONALE",
+                subtitleBirth: "Per precisione karmica avanzata",
+                subtitlePrasna: "Per analisi dei transiti planetari",
+                tooltipBirth: "Le coordinate della tua nascita creano il Lagna (Ascendente) - il punto di ingresso dell'anima in questa incarnazione. Fornisce un contesto karmico più profondo ma non è richiesto per una lettura Prasna.",
+                tooltipPrasna: "La posizione attuale abilita l'analisi dei transiti - mostrando dove risiedono i pianeti ora rispetto al tuo tema natale. Aggiunge precisione temporale alla lettura.",
+                translating: "Traducendo...",
+                translatedSuccess: "Contenuto tradotto con successo",
+                translationError: "Traduzione fallita. Visualizzazione testo originale.",
+                houseActive: "Casa Attiva",
+                housePlanet: "Pianeta Presente",
+                houseLagna: "Lagna",
+                houseArudha: "Arudha",
+                planets: { "Sun": "Surya", "Moon": "Chandra", "Mars": "Mangala", "Mercury": "Budha", "Jupiter": "Guru", "Venus": "Shukra", "Saturn": "Shani", "Rahu": "Rahu", "Ketu": "Ketu", "Uranus": "Indra" },
+                // Accessibility strings
+                highContrastOn: "Alto contrasto: ATTIVATO",
+                highContrastOff: "Alto contrasto: DISATTIVATO",
+                colorBlindOn: "Modalità daltonico: ATTIVATA",
+                colorBlindOff: "Modalità daltonico: DISATTIVATA",
+                reducedMotionOn: "Movimento ridotto: ATTIVATO",
+                reducedMotionOff: "Movimento ridotto: DISATTIVATO",
+                wideSpacingOn: "Spaziatura ampia: ATTIVATA",
+                wideSpacingOff: "Spaziatura ampia: DISATTIVATA",
+                hideArrowsOn: "Frecce: Nascoste",
+                hideArrowsOff: "Frecce: Visibili",
+                readingModeOn: "Modalità lettura: Focus",
+                readingModeOff: "Modalità lettura: Normale",
+                meditationSkipped: "Meditazione saltata",
+                houseUpDominant: "UP Dominante",
+                houseDnDominant: "DOWN Dominante",
+                // Export strings
+                exportReading: "Esporta Lettura",
+                exportDescription: "Scarica la tua lettura completa con dettagli e formattazione avanzati",
+                exportFormat: "Formato di Esportazione:",
+                includeDetailedContext: "Includi contesto astrologico dettagliato",
+                exportNow: "✨ Esporta Lettura Ora",
+                noReadingToExport: "Nessuna lettura disponibile per l'esportazione",
+                preparingExport: "Preparando la tua esportazione..."
             }
         };
 
-        const planetColors = { "Sun": "#FFD700", "Moon": "#C0C0C0", "Mars": "#FF4500", "Mercury": "#32CD32", "Jupiter": "#F4C430", "Venus": "#FF69B4", "Saturn": "#4682B4", "Rahu": "#4B0082", "Ketu": "#808080", "Uranus": "#AFEEEE" };
+        const planetColors = {
+            "Sun": "#FFD700",
+            "Moon": "#E0E0E0",
+            "Mars": "#FF5722",
+            "Mercury": "#4CAF50",
+            "Jupiter": "#FF9800",
+            "Venus": "#E91E63",
+            "Saturn": "#2196F3",
+            "Rahu": "#9C27B0",
+            "Ketu": "#607D8B",
+            "Uranus": "#00BCD4"
+        };
 
-        function setLang(l) { currentLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); document.getElementById('btn-' + l).classList.add('active'); }
-        function useMyLocation() { if (navigator.geolocation) navigator.geolocation.getCurrentPosition(p => { document.getElementById('pLat').value = p.coords.latitude.toFixed(4); document.getElementById('pLon').value = p.coords.longitude.toFixed(4); }); }
+        // Enhanced Prasna tradition house colors based on cast elements and states
+        const houseColors = {
+            // Special houses
+            lagna: "rgba(80, 220, 100, 0.35)",
+            arudha: "rgba(255, 215, 100, 0.6)",
 
-        function drawGoldCoin(x, y) {
-            ctx.save(); ctx.translate(x, y);
-            const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 14);
-            grad.addColorStop(0, "#fff7ad"); grad.addColorStop(0.5, "#d4af37"); grad.addColorStop(1, "#8b4513");
-            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
-            ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.font = "bold 9px Arial"; ctx.textAlign = "center"; ctx.fillText("SRI", 0, 3);
+            // Planet presence
+            planetPresent: "rgba(255, 200, 100, 0.5)",
+            planetPresentMultiple: "rgba(255, 180, 80, 0.55)",
+
+            // Cast dominance colors
+            upDominant: "rgba(200, 170, 90, 0.5)",
+            dnDominant: "rgba(120, 100, 70, 0.5)",
+            balanced: "rgba(160, 135, 80, 0.4)",
+
+            // Activity levels
+            active: "rgba(228, 196, 74, 0.4)",
+            veryActive: "rgba(228, 196, 74, 0.5)",
+            empty: "rgba(40, 30, 25, 0.5)",
+
+            // Element colors for houses (traditional Prasna)
+            fireHouses: "rgba(255, 107, 53, 0.25)",    // Houses 1, 5, 9
+            earthHouses: "rgba(230, 184, 77, 0.25)",   // Houses 2, 6, 10
+            airHouses: "rgba(90, 159, 212, 0.25)",     // Houses 3, 7, 11
+            waterHouses: "rgba(208, 208, 208, 0.25)",  // Houses 4, 8, 12
+
+            // Planet-specific glows
+            sunHouse: "rgba(255, 215, 0, 0.4)",
+            moonHouse: "rgba(192, 192, 192, 0.4)",
+            marsHouse: "rgba(255, 69, 0, 0.35)",
+            mercuryHouse: "rgba(50, 205, 50, 0.35)",
+            jupiterHouse: "rgba(244, 196, 48, 0.4)",
+            venusHouse: "rgba(255, 105, 180, 0.35)",
+            saturnHouse: "rgba(70, 130, 180, 0.35)",
+            rahuHouse: "rgba(75, 0, 130, 0.35)",
+            ketuHouse: "rgba(128, 128, 128, 0.35)"
+        };
+
+        // House element mapping (traditional Prasna classification)
+        const houseElements = {
+            1: 'fire', 5: 'fire', 9: 'fire',
+            2: 'earth', 6: 'earth', 10: 'earth',
+            3: 'air', 7: 'air', 11: 'air',
+            4: 'water', 8: 'water', 12: 'water'
+        };
+
+        const rashiSanskrit = ["Mesha", "Vrishabha", "Mithuna", "Karka", "Simha", "Kanya", "Thula", "Vrischika", "Dhanus", "Makara", "Kumbha", "Meena"];
+        const houseCoords = { 12: [0, 0], 1: [1, 0], 2: [2, 0], 3: [3, 0], 11: [0, 1], 4: [3, 1], 10: [0, 2], 5: [3, 2], 9: [0, 3], 8: [1, 3], 7: [2, 3], 6: [3, 3] };
+        const timePileSymbols = ["", "Dhwaja", "Dhumra", "Simha", "Shwana", "Vrushabha", "Khara", "Gaja", "Dhwanksha"];
+
+        // ========================================
+        // CORE FUNCTIONS
+        // ========================================
+        const API_BASE = window.APP_CONFIG.API_BASE_URL;
+        const canvas = document.getElementById('chartCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const isMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+
+        // ========================================
+        // ENHANCED ACCESSIBILITY FUNCTIONS
+        // ========================================
+        function setFontSize(scale) {
+            fontSize = scale;
+            document.documentElement.style.setProperty('--font-scale', scale);
+
+            // Update button states
+            document.querySelectorAll('[id^="btn-font-"]').forEach(btn => btn.classList.remove('active'));
+            const sizeMap = { 0.9: 'small', 1: 'normal', 1.25: 'large', 1.5: 'xlarge' };
+            const btnId = 'btn-font-' + (sizeMap[scale] || 'normal');
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('active');
+
+            // Apply text size data attribute for CSS
+            if (scale >= 1.25) {
+                document.body.setAttribute('data-text-size', scale >= 1.5 ? 'xlarge' : 'large');
+            } else {
+                document.body.removeAttribute('data-text-size');
+            }
+
+            localStorage.setItem('rishi_font_size', scale);
+            const t = i18n[currentLang];
+            const msg = scale === 0.9 ? 'Text size: Small' :
+                scale === 1 ? 'Text size: Normal' :
+                    scale === 1.25 ? 'Text size: Large' : 'Text size: Extra Large';
+            showToast(t[msg] || msg, 'info', 2000);
+        }
+
+        function toggleHighContrast() {
+            highContrast = !highContrast;
+            document.body.setAttribute('data-contrast', highContrast ? 'high' : 'normal');
+            document.getElementById('btn-contrast').classList.toggle('active', highContrast);
+            localStorage.setItem('rishi_high_contrast', highContrast);
+            const t = i18n[currentLang];
+            showToast(highContrast ? (t.highContrastOn || 'High contrast: ON') : (t.highContrastOff || 'High contrast: OFF'), 'info', 2000);
+            if (window.LAST_CAST) drawChart(window.LAST_CAST, window.LAST_CAST.transit_planets);
+        }
+
+        function toggleColorBlindMode() {
+            colorBlindMode = !colorBlindMode;
+            document.body.setAttribute('data-color-mode', colorBlindMode ? 'blind' : 'normal');
+            document.getElementById('btn-colorblind').classList.toggle('active', colorBlindMode);
+            localStorage.setItem('rishi_color_blind', colorBlindMode);
+            const t = i18n[currentLang];
+            showToast(colorBlindMode ? (t.colorBlindOn || 'Color blind mode: ON') : (t.colorBlindOff || 'Color blind mode: OFF'), 'info', 2000);
+            if (window.LAST_CAST) drawChart(window.LAST_CAST, window.LAST_CAST.transit_planets);
+        }
+
+        function toggleReducedMotion() {
+            reducedMotion = !reducedMotion;
+            document.body.setAttribute('data-motion', reducedMotion ? 'reduced' : 'normal');
+            document.getElementById('btn-motion').classList.toggle('active', reducedMotion);
+            localStorage.setItem('rishi_reduced_motion', reducedMotion);
+            const t = i18n[currentLang];
+            showToast(reducedMotion ? (t.reducedMotionOn || 'Reduced motion: ON') : (t.reducedMotionOff || 'Reduced motion: OFF'), 'info', 2000);
+        }
+
+        function toggleWideSpacing() {
+            wideSpacing = !wideSpacing;
+            document.body.setAttribute('data-spacing', wideSpacing ? 'wide' : 'normal');
+            document.getElementById('btn-spacing').classList.toggle('active', wideSpacing);
+            localStorage.setItem('rishi_wide_spacing', wideSpacing);
+            const t = i18n[currentLang];
+            showToast(wideSpacing ? (t.wideSpacingOn || 'Wide spacing: ON') : (t.wideSpacingOff || 'Wide spacing: OFF'), 'info', 2000);
+        }
+
+        function toggleHideArrows() {
+            hideArrows = !hideArrows;
+            document.body.setAttribute('data-hide-arrows', hideArrows ? 'true' : 'false');
+            document.getElementById('btn-hide-arrows').classList.toggle('active', hideArrows);
+            localStorage.setItem('rishi_hide_arrows', hideArrows);
+            const t = i18n[currentLang];
+            showToast(hideArrows ? (t.hideArrowsOn || 'Section arrows: Hidden') : (t.hideArrowsOff || 'Section arrows: Visible'), 'info', 2000);
+        }
+
+        function toggleReadingMode() {
+            readingMode = !readingMode;
+            document.body.setAttribute('data-reading-mode', readingMode ? 'focused' : 'normal');
+            document.getElementById('btn-reading-mode').classList.toggle('active', readingMode);
+            localStorage.setItem('rishi_reading_mode', readingMode);
+            const t = i18n[currentLang];
+            showToast(readingMode ? (t.readingModeOn || 'Reading mode: Focused') : (t.readingModeOff || 'Reading mode: Normal'), 'info', 2000);
+        }
+
+        function skipMeditation() {
+            skipMeditationFlag = true;
+            const overlay = document.getElementById('meditation-overlay');
+            overlay.style.display = 'none';
+            const t = i18n[currentLang];
+            showToast(t.meditationSkipped || 'Meditation skipped', 'info', 2000);
+        }
+
+        function loadAccessibilitySettings() {
+            const savedFont = localStorage.getItem('rishi_font_size');
+            const savedContrast = localStorage.getItem('rishi_high_contrast');
+            const savedMotion = localStorage.getItem('rishi_reduced_motion');
+            const savedColorBlind = localStorage.getItem('rishi_color_blind');
+            const savedSpacing = localStorage.getItem('rishi_wide_spacing');
+            const savedHideArrows = localStorage.getItem('rishi_hide_arrows');
+            const savedReadingMode = localStorage.getItem('rishi_reading_mode');
+
+            if (savedFont) setFontSize(parseFloat(savedFont));
+            if (savedContrast === 'true') toggleHighContrast();
+            if (savedMotion === 'true') toggleReducedMotion();
+            if (savedColorBlind === 'true') toggleColorBlindMode();
+            if (savedSpacing === 'true') toggleWideSpacing();
+            if (savedHideArrows === 'true') toggleHideArrows();
+            if (savedReadingMode === 'true') toggleReadingMode();
+        }
+
+        // ========================================
+        // COLLAPSIBLE SECTIONS
+        // ========================================
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            const arrow = document.getElementById('arrow-' + sectionId);
+            const header = content.previousElementSibling;
+
+            const isCollapsed = content.classList.contains('collapsed');
+
+            if (isCollapsed) {
+                content.classList.remove('collapsed');
+                arrow.classList.remove('collapsed');
+                header.setAttribute('aria-expanded', 'true');
+            } else {
+                content.classList.add('collapsed');
+                arrow.classList.add('collapsed');
+                header.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        // ========================================
+        // UI FUNCTIONS
+        // ========================================
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const maxSize = Math.min(container.clientWidth - 20, 600);
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.style.width = maxSize + 'px';
+            canvas.style.height = maxSize + 'px';
+            canvas.width = maxSize * dpr;
+            canvas.height = maxSize * dpr;
+
+            ctx.scale(dpr, dpr);
+
+            if (window.LAST_CAST) {
+                drawChart(window.LAST_CAST, window.LAST_CAST.transit_planets);
+            } else {
+                drawChart(null);
+            }
+        }
+
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ========================================
+        // CHART EXPORT
+        // ========================================
+        async function exportChart() {
+            if (!window.LAST_CAST) {
+                showToast(i18n[currentLang].exportError, 'warning');
+                return;
+            }
+
+            try {
+                const exportCanvas = document.createElement('canvas');
+                const exportCtx = exportCanvas.getContext('2d');
+
+                const chartSize = 800;
+                const headerHeight = 140;
+                const footerHeight = 100;
+                const padding = 40;
+
+                exportCanvas.width = chartSize + (padding * 2);
+                exportCanvas.height = chartSize + headerHeight + footerHeight + (padding * 2);
+
+                const gradient = exportCtx.createRadialGradient(
+                    exportCanvas.width / 2, exportCanvas.height / 2, 0,
+                    exportCanvas.width / 2, exportCanvas.height / 2, exportCanvas.width
+                );
+                gradient.addColorStop(0, '#2a1810');
+                gradient.addColorStop(1, '#0a0503');
+                exportCtx.fillStyle = gradient;
+                exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+                exportCtx.strokeStyle = '#d4af37';
+                exportCtx.lineWidth = 4;
+                exportCtx.strokeRect(10, 10, exportCanvas.width - 20, exportCanvas.height - 20);
+
+                exportCtx.fillStyle = '#d4af37';
+                exportCtx.font = 'bold 32px Palatino, Georgia, serif';
+                exportCtx.textAlign = 'center';
+                exportCtx.fillText('RISHI ASHTAMANGALA PRASNA', exportCanvas.width / 2, 60);
+
+                const question = window.LAST_CAST.question || 'General Reading';
+                exportCtx.font = 'italic 20px Palatino, Georgia, serif';
+                exportCtx.fillStyle = '#f5f0e8';
+                exportCtx.fillText(question, exportCanvas.width / 2, 95);
+
+                const dateStr = new Date().toLocaleString();
+                exportCtx.font = '16px Arial';
+                exportCtx.fillStyle = '#888';
+                exportCtx.fillText(`${dateStr} | ${currentLang.toUpperCase()}`, exportCanvas.width / 2, 125);
+
+                const chartY = headerHeight + padding;
+                exportCtx.save();
+                exportCtx.translate(padding, chartY);
+
+                exportCtx.fillStyle = '#050505';
+                exportCtx.fillRect(0, 0, chartSize, chartSize);
+                exportCtx.strokeStyle = '#d4af37';
+                exportCtx.lineWidth = 4;
+                exportCtx.strokeRect(0, 0, chartSize, chartSize);
+
+                const step = chartSize / 4;
+                const cast = window.LAST_CAST;
+                const transitPlanets = cast.transit_planets || {};
+                const t = i18n[currentLang];
+
+                for (let h = 1; h <= 12; h++) {
+                    const [cx, cy] = houseCoords[h];
+                    const x = cx * step, y = cy * step;
+                    const shells = cast.board ? cast.board[h] : [];
+                    const up = shells.filter(s => s.up === "UP").length;
+                    const dn = shells.length - up;
+                    const ratio = shells.length > 0 ? up / shells.length : 0.5;
+
+                    let hasPlanet = false;
+                    for (const p in transitPlanets) { if (transitPlanets[p].house === h) hasPlanet = true; }
+
+                    // Colorized houses based on Prasna tradition
+                    let houseFill = `rgba(${Math.floor(50 + ratio * 100)}, ${Math.floor(25 + ratio * 50)}, 10, ${hasPlanet ? 0.7 : 0.4})`;
+
+                    if (cast.janma_lagna && cast.janma_lagna.house === h) {
+                        houseFill = houseColors.lagna;
+                    } else if (h === cast.arudha) {
+                        houseFill = houseColors.arudha;
+                    } else if (hasPlanet) {
+                        houseFill = houseColors.planetPresent;
+                    }
+
+                    exportCtx.fillStyle = houseFill;
+                    exportCtx.fillRect(x, y, step, step);
+                    exportCtx.strokeStyle = "rgba(212,175,55,0.3)";
+                    exportCtx.lineWidth = 1;
+                    exportCtx.strokeRect(x, y, step, step);
+
+                    exportCtx.fillStyle = "#d4af37";
+                    exportCtx.font = "bold 16px serif";
+                    exportCtx.textAlign = "center";
+                    exportCtx.fillText(rashiSanskrit[h - 1], x + step / 2, y + 22);
+
+                    exportCtx.font = "bold 14px Arial";
+                    exportCtx.fillText(`${up}${t.up[0]} / ${dn}${t.dn[0]}`, x + step / 2, y + step - 10);
+
+                    let planetsInHouse = Object.entries(transitPlanets).filter(([p, d]) => d.house === h);
+                    planetsInHouse.forEach(([p, d], idx) => {
+                        exportCtx.fillStyle = planetColors[p] || "#fff";
+                        exportCtx.font = "bold 14px Arial";
+                        const px = x + 15 + (idx % 2) * (step - 30);
+                        const py = y + 40 + Math.floor(idx / 2) * 16;
+                        exportCtx.textAlign = (idx % 2 === 0) ? "left" : "right";
+                        exportCtx.fillText(t.planets[p] || p, px, py);
+                    });
+                    exportCtx.textAlign = "center";
+
+                    const scale = chartSize / 600;
+                    shells.forEach((s, idx) => {
+                        let sx, sy;
+                        if (s.pos) {
+                            sx = x + 15 + (s.pos[0] / 100) * (step - 30);
+                            sy = y + 55 + (s.pos[1] / 100) * (step - 80);
+                        } else {
+                            sx = x + 18 + (idx % 5) * 28;
+                            sy = y + 55 + Math.floor(idx / 5) * 14;
+                        }
+                        if (sy < y + step - 20) {
+                            drawShellOnCanvas(exportCtx, sx, sy, s.up === "UP", scale);
+                        }
+                    });
+
+                    if (h === cast.arudha) {
+                        drawGoldCoinOnCanvas(exportCtx, x + step - 40, y + 35, scale);
+                    }
+
+                    if (cast.janma_lagna && cast.janma_lagna.house === h) {
+                        exportCtx.strokeStyle = "#00ff00";
+                        exportCtx.lineWidth = 3;
+                        exportCtx.strokeRect(x + 8, y + 8, step - 16, step - 16);
+                        exportCtx.fillStyle = "#00ff00";
+                        exportCtx.font = "bold 14px Arial";
+                        exportCtx.fillText("LAGNA", x + step / 2, y + step - 30);
+                    }
+                }
+
+                exportCtx.fillStyle = "#d4af37";
+                exportCtx.font = "50px serif";
+                exportCtx.fillText("ॐ", chartSize / 2, chartSize / 2 + 18);
+
+                exportCtx.restore();
+
+                const footerY = chartY + chartSize + 30;
+
+                exportCtx.fillStyle = 'rgba(212, 175, 55, 0.1)';
+                exportCtx.strokeStyle = '#d4af37';
+                exportCtx.lineWidth = 1;
+                exportCtx.fillRect(padding, footerY, chartSize, footerHeight - 20);
+                exportCtx.strokeRect(padding, footerY, chartSize, footerHeight - 20);
+
+                exportCtx.fillStyle = '#d4af37';
+                exportCtx.font = 'bold 16px Arial';
+                exportCtx.textAlign = 'center';
+
+                let statsY = footerY + 28;
+                const tp = cast.time_piles || {};
+                const tpText = `Time Piles: Past(${timePileSymbols[tp.past] || tp.past}) Present(${timePileSymbols[tp.present] || tp.present}) Future(${timePileSymbols[tp.future] || tp.future})`;
+
+                exportCtx.fillText(tpText, exportCanvas.width / 2, statsY);
+
+                statsY += 24;
+                const counts = cast.counts || {};
+                const upText = `${counts.total_up || 0} ↑  |  ${counts.total_dn || 0} ↓  |  Arudha: House ${cast.arudha || '?'}`;
+                exportCtx.fillText(upText, exportCanvas.width / 2, statsY);
+
+                if (cast.janma_lagna) {
+                    statsY += 24;
+                    const lagnaText = `Lagna: ${cast.janma_lagna.sign} (${cast.janma_lagna.degrees.toFixed(1)}°)`;
+                    exportCtx.fillStyle = '#4caf50';
+                    exportCtx.fillText(lagnaText, exportCanvas.width / 2, statsY);
+                }
+
+                const safeQuestion = question.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+                const filename = `Ashtamangala_${safeQuestion}_${Date.now()}.png`;
+
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = exportCanvas.toDataURL('image/png');
+                link.click();
+
+                showToast(i18n[currentLang].exportSuccess, 'success');
+
+            } catch (err) {
+                console.error('Export error:', err);
+                showToast(i18n[currentLang].exportError, 'warning');
+            }
+        }
+
+        // ========================================
+        // INTERPRETATION EXPORT
+        // ========================================
+        let selectedExportFormat = 'markdown';
+
+        function selectExportFormat(format) {
+            selectedExportFormat = format;
+            document.querySelectorAll('.export-format-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'transparent';
+                btn.style.borderColor = 'var(--accent)';
+                btn.style.color = 'var(--text-muted)';
+            });
+            const activeBtn = document.getElementById(`btn-export-${format}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.style.background = 'rgba(228,196,74,0.2)';
+                activeBtn.style.borderColor = 'var(--gold)';
+                activeBtn.style.color = 'var(--gold)';
+            }
+        }
+
+        async function exportInterpretation() {
+            if (!window.LAST_CAST || !window.CURRENT_INTERP.structure || !window.CURRENT_INTERP.advice) {
+                showToast(i18n[currentLang].noReadingToExport || 'No reading available to export', 'warning');
+                return;
+            }
+
+            const statusEl = document.getElementById('export-status');
+            const detailed = document.getElementById('export-detailed').checked;
+
+            try {
+                statusEl.textContent = i18n[currentLang].preparingExport || 'Preparing your export...';
+                statusEl.style.display = 'block';
+
+                const exportData = {
+                    cast: window.LAST_CAST,
+                    structure: window.CURRENT_INTERP.structure,
+                    advice: window.CURRENT_INTERP.advice,
+                    format: selectedExportFormat,
+                    lang: currentLang,
+                    detailed: detailed
+                };
+
+                const response = await fetch(`${API_BASE}/export`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(exportData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                // Get the content type and filename
+                const contentType = response.headers.get('Content-Type');
+                const contentDisposition = response.headers.get('Content-Disposition');
+
+                // Extract filename from Content-Disposition header
+                let filename = 'Ashtamangala_Reading';
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="(.+)"/);
+                    if (match) filename = match[1];
+                }
+
+                // Handle PDF binary data vs text data
+                let blob;
+                if (contentType === 'application/pdf') {
+                    // For PDF, get binary blob directly
+                    blob = await response.blob();
+                } else {
+                    // For text formats (Markdown, HTML)
+                    const content = await response.text();
+                    blob = new Blob([content], { type: contentType });
+                }
+
+                // Create and trigger download
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                statusEl.textContent = i18n[currentLang].exportSuccess || 'Export completed successfully!';
+                statusEl.style.color = 'var(--success)';
+
+                showToast(i18n[currentLang].exportSuccess || 'Reading exported successfully!', 'success');
+
+                // Clear status after 3 seconds
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                    statusEl.style.color = 'var(--text-muted)';
+                }, 3000);
+
+            } catch (err) {
+                console.error('Export error:', err);
+                statusEl.textContent = i18n[currentLang].exportError || 'Export failed. Please try again.';
+                statusEl.style.color = 'var(--error)';
+                showToast(i18n[currentLang].exportError || 'Failed to export reading', 'warning');
+            }
+        }
+
+        function drawShellOnCanvas(ctx, x, y, isUp, scale = 1) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 8 * scale, 5 * scale, 0, 0, Math.PI * 2);
+            if (isUp) {
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-4 * scale, 0);
+                ctx.lineTo(4 * scale, 0);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = 'rgba(212, 175, 55, 0.5)';
+                ctx.fill();
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
             ctx.restore();
         }
 
-        function drawShell(x, y, isUp) {
+        function drawGoldCoinOnCanvas(ctx, x, y, scale = 1) {
+            ctx.save();
+            ctx.translate(x, y);
+            const grad = ctx.createRadialGradient(0, 0, 3 * scale, 0, 0, 20 * scale);
+            grad.addColorStop(0, "#fff7ad");
+            grad.addColorStop(0.5, "#d4af37");
+            grad.addColorStop(1, "#8b4513");
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, 20 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.font = `bold ${12 * scale}px Arial`;
+            ctx.textAlign = "center";
+            ctx.fillText("SRI", 0, 4 * scale);
+            ctx.restore();
+        }
+
+        // ========================================
+        // LANGUAGE & TRANSLATION
+        // ========================================
+        async function setLang(l) {
+            if (isTranslating) return;
+
+            localStorage.setItem('rishi_language', l);
+
+            const prevLang = currentLang;
+            currentLang = l;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById('btn-' + l);
+            if (activeBtn) activeBtn.classList.add('active');
+            updateStaticUI();
+
+            if (window.LAST_CAST && window.CURRENT_INTERP.structure && prevLang !== l) {
+                await translateCurrentReading(prevLang, l);
+            }
+
+            if (window.LAST_CAST) drawChart(window.LAST_CAST, window.LAST_CAST.transit_planets);
+        }
+
+        async function translateCurrentReading(fromLang, toLang) {
+            if (!window.CURRENT_INTERP.structure || !window.CURRENT_INTERP.advice) return;
+
+            isTranslating = true;
+
+            const overlay = document.getElementById('translation-overlay');
+            const overlayText = document.getElementById('translation-text');
+            overlay.style.display = 'flex';
+            overlayText.textContent = i18n[toLang].translating;
+
+            document.getElementById('structure-content').classList.add('translating');
+            document.getElementById('advice-content').classList.add('translating');
+
+            const indicator = document.getElementById('translating-indicator');
+            const indicatorText = document.getElementById('translating-text');
+            indicator.classList.remove('hidden');
+            indicatorText.textContent = i18n[toLang].translating;
+
+            try {
+                const cached = window.LAST_CAST.translations?.[toLang];
+
+                if (cached && cached.structure && cached.advice) {
+                    window.CURRENT_INTERP.structure = cached.structure;
+                    window.CURRENT_INTERP.advice = cached.advice;
+                    renderStructureUI(cached.structure, 'structure-content');
+                    renderAdviceUI(cached.advice, 'advice-content');
+                    showToast(i18n[toLang].translatedSuccess, 'success');
+                } else {
+                    const struct = await fetchTranslation(window.CURRENT_INTERP.structure, toLang, 'structure');
+                    const advice = await fetchTranslation(window.CURRENT_INTERP.advice, toLang, 'advice');
+
+                    window.CURRENT_INTERP.structure = struct;
+                    window.CURRENT_INTERP.advice = advice;
+
+                    renderStructureUI(struct, 'structure-content');
+                    renderAdviceUI(advice, 'advice-content');
+
+                    if (!window.LAST_CAST.translations) window.LAST_CAST.translations = {};
+                    window.LAST_CAST.translations[toLang] = { structure: struct, advice: advice };
+
+                    updateHistoryTranslations(window.LAST_CAST, toLang, struct, advice);
+
+                    showToast(i18n[toLang].translatedSuccess, 'success');
+                }
+            } catch (err) {
+                console.error('Translation error:', err);
+                showToast(i18n[toLang].translationError, 'warning', 5000);
+            } finally {
+                isTranslating = false;
+                indicator.classList.add('hidden');
+
+                const overlay = document.getElementById('translation-overlay');
+                overlay.style.display = 'none';
+                document.getElementById('structure-content').classList.remove('translating');
+                document.getElementById('advice-content').classList.remove('translating');
+            }
+        }
+
+        async function fetchTranslation(content, targetLang, type) {
+            const systemPrompt = `You are a professional translator specializing in spiritual and astrological texts. Translate the following content to ${targetLang}. Maintain the spiritual tone, technical terminology, and JSON structure exactly. Do not add or remove any fields.`;
+
+            const response = await fetch(`${API_BASE}/translate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content, targetLang, type, systemPrompt })
+            });
+
+            if (!response.ok) throw new Error('Translation failed');
+            return await response.json();
+        }
+
+        function updateHistoryTranslations(castData, lang, structure, advice) {
+            let history = JSON.parse(localStorage.getItem('rishi_history') || '[]');
+            const index = history.findIndex(h => h.timestamp === castData.timestamp && h.cast.question === castData.question);
+
+            if (index !== -1) {
+                if (!history[index].translations) history[index].translations = {};
+                history[index].translations[lang] = { structure, advice };
+                localStorage.setItem('rishi_history', JSON.stringify(history));
+            }
+        }
+
+        function updateStaticUI() {
+            const t = i18n[currentLang];
+            document.getElementById('userQuestion').placeholder = t.placeholder;
+            document.getElementById('btn-ritual').innerText = t.ritual;
+            document.getElementById('btn-history').innerText = t.history;
+            document.getElementById('lbl-memory').innerText = t.memory;
+            document.getElementById('lbl-birth').innerText = t.birth;
+            document.getElementById('lbl-prasna').innerText = t.prasna;
+            document.getElementById('btn-geo').innerText = t.detect;
+            document.getElementById('lbl-prev').innerText = t.prev;
+            document.getElementById('btn-clear').innerText = t.clear;
+            document.getElementById('waiting-msg').innerText = t.waitMsg;
+            document.getElementById('meditation-status').innerText = t.medStatus;
+
+            document.getElementById('lbl-query-title').innerText = t.queryTitle;
+            document.getElementById('lbl-inputs-title').innerText = t.inputsTitle;
+
+            document.getElementById('lbl-optional').innerText = t.optional;
+            document.getElementById('lbl-optional2').innerText = t.optional;
+            document.getElementById('subtitle-birth').innerText = t.subtitleBirth;
+            document.getElementById('subtitle-prasna').innerText = t.subtitlePrasna;
+            document.getElementById('tooltip-birth').innerText = t.tooltipBirth;
+            document.getElementById('tooltip-prasna').innerText = t.tooltipPrasna;
+
+            const latText = currentLang === 'es' ? 'Latitud' : currentLang === 'it' ? 'Latitudine' : 'Latitude';
+            const lonText = currentLang === 'es' ? 'Longitud' : currentLang === 'it' ? 'Longitudine' : 'Longitude';
+            document.getElementById('bLat').placeholder = latText;
+            document.getElementById('bLon').placeholder = lonText;
+            document.getElementById('pLat').placeholder = latText;
+            document.getElementById('pLon').placeholder = lonText;
+
+            // Update export section translations
+            const exportEls = document.querySelectorAll('[data-i18n]');
+            exportEls.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    el.textContent = t[key];
+                }
+            });
+        }
+
+        function useMyLocation() {
+            if (navigator.geolocation) {
+                const btn = document.getElementById('btn-geo');
+                btn.style.opacity = '0.6';
+                navigator.geolocation.getCurrentPosition(p => {
+                    document.getElementById('pLat').value = p.coords.latitude.toFixed(4);
+                    document.getElementById('pLon').value = p.coords.longitude.toFixed(4);
+                    showToast(i18n[currentLang].detect + ' ✓', 'success', 2000);
+                    btn.style.opacity = '1';
+                }, () => {
+                    showToast('Geolocation denied', 'warning', 3000);
+                    btn.style.opacity = '1';
+                }, { enableHighAccuracy: true, timeout: 10000 });
+            }
+        }
+
+        // ========================================
+        // CHART DRAWING WITH COLORIZED HOUSES
+        // ========================================
+        function drawGoldCoin(x, y, scale = 1) {
             ctx.save(); ctx.translate(x, y);
-            ctx.beginPath(); ctx.ellipse(0, 0, 5, 3, 0, 0, Math.PI * 2);
-            if (isUp) { ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-2.5, 0); ctx.lineTo(2.5, 0); ctx.stroke(); }
+            const grad = ctx.createRadialGradient(0, 0, 2 * scale, 0, 0, 14 * scale);
+            grad.addColorStop(0, "#fff7ad"); grad.addColorStop(0.5, "#d4af37"); grad.addColorStop(1, "#8b4513");
+            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(0, 0, 14 * scale, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.font = `bold ${9 * scale}px Arial`; ctx.textAlign = "center"; ctx.fillText("SRI", 0, 3 * scale);
+            ctx.restore();
+        }
+
+        function drawShell(x, y, isUp, scale = 1) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.beginPath(); ctx.ellipse(0, 0, 5 * scale, 3 * scale, 0, 0, Math.PI * 2);
+            if (isUp) { ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-2.5 * scale, 0); ctx.lineTo(2.5 * scale, 0); ctx.stroke(); }
             else { ctx.fillStyle = 'rgba(212, 175, 55, 0.5)'; ctx.fill(); ctx.strokeStyle = '#d4af37'; ctx.stroke(); }
             ctx.restore();
         }
 
         function drawChart(cast, transitPlanets = {}) {
-            const size = canvas.width; const step = size / 4; ctx.clearRect(0, 0, size, size);
+            const rect = canvas.getBoundingClientRect();
+            const cssSize = rect.width;
+            const size = cssSize;
+            const step = size / 4;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             const t = i18n[currentLang];
+
+            const scale = size / 600;
+
+            // Determine dominant planets in each house for coloring
+            const housePlanetCounts = {};
             for (let h = 1; h <= 12; h++) {
-                const [cx, cy] = houseCoords[h]; const x = cx * step, y = cy * step;
+                housePlanetCounts[h] = Object.entries(transitPlanets).filter(([p, d]) => d.house === h);
+            }
+
+            for (let h = 1; h <= 12; h++) {
+                const [cx, cy] = houseCoords[h];
+                const x = cx * step, y = cy * step;
                 const shells = (cast && cast.board) ? cast.board[h] : [];
                 const up = shells.filter(s => s.up === "UP").length;
                 const dn = shells.length - up;
                 const ratio = shells.length > 0 ? up / shells.length : 0.5;
+                const planetCount = housePlanetCounts[h].length;
+                const hasPlanet = planetCount > 0;
 
-                let hasPlanet = false;
-                for (const p in transitPlanets) { if (transitPlanets[p].house === h) hasPlanet = true; }
+                // Enhanced house coloring based on Prasna tradition
+                let houseFill;
 
-                ctx.fillStyle = `rgba(${Math.floor(50 + ratio * 100)}, ${Math.floor(25 + ratio * 50)}, 10, ${hasPlanet ? 0.7 : 0.4})`;
+                // Priority 1: Special houses (Lagna and Arudha)
+                if (cast && cast.janma_lagna && cast.janma_lagna.house === h) {
+                    houseFill = houseColors.lagna;
+                } else if (cast && h === cast.arudha) {
+                    houseFill = houseColors.arudha;
+                }
+                // Priority 2: Houses with planets
+                else if (hasPlanet) {
+                    // Multiple planets = stronger color
+                    if (planetCount >= 2) {
+                        houseFill = houseColors.planetPresentMultiple;
+                    } else {
+                        // Single planet - use planet-specific color if available
+                        const planetName = housePlanetCounts[h][0][0];
+                        houseFill = houseColors[planetName.toLowerCase() + 'House'] || houseColors.planetPresent;
+                    }
+                }
+                // Priority 3: Cast dominance
+                else if (shells.length > 0) {
+                    if (ratio > 0.7) {
+                        houseFill = houseColors.upDominant;
+                    } else if (ratio < 0.3) {
+                        houseFill = houseColors.dnDominant;
+                    } else if (shells.length >= 4) {
+                        houseFill = houseColors.veryActive;
+                    } else {
+                        houseFill = houseColors.active;
+                    }
+                }
+                // Priority 4: Element-based coloring for empty houses
+                else {
+                    // Add subtle element color to empty houses
+                    const element = houseElements[h];
+                    houseFill = houseColors[element + 'Houses'] || houseColors.empty;
+                }
+
+                ctx.fillStyle = houseFill;
                 ctx.fillRect(x, y, step, step);
-                ctx.strokeStyle = "rgba(212,175,55,0.3)"; ctx.strokeRect(x, y, step, step);
 
-                ctx.fillStyle = "#d4af37"; ctx.font = "bold 10px serif"; ctx.textAlign = "center";
-                ctx.fillText(rashiSanskrit[h - 1], x + step / 2, y + 15);
-                ctx.font = "bold 8px Arial"; ctx.fillText(`${up}${t.up[0]} / ${dn}${t.dn[0]}`, x + step / 2, y + step - 8);
+                // Enhanced house border with varying intensity
+                const borderAlpha = hasPlanet ? 0.6 : (shells.length > 0 ? 0.4 : 0.25);
+                ctx.strokeStyle = highContrast ? `rgba(255,255,0,${borderAlpha})` : `rgba(228,196,74,${borderAlpha})`;
+                ctx.lineWidth = hasPlanet ? 2.5 : (h === cast?.arudha || cast?.janma_lagna?.house === h ? 2 : 1.5);
+                ctx.strokeRect(x, y, step, step);
 
-                let planetsInHouse = Object.entries(transitPlanets).filter(([p, d]) => d.house === h);
-                planetsInHouse.forEach(([p, d], idx) => {
+                // Inner glow for special houses
+                if (h === cast?.arudha || cast?.janma_lagna?.house === h || hasPlanet) {
+                    ctx.shadowColor = h === cast?.arudha ? 'rgba(255,215,0,0.3)' :
+                        cast?.janma_lagna?.house === h ? 'rgba(80,220,100,0.3)' :
+                            'rgba(255,200,100,0.2)';
+                    ctx.shadowBlur = 10 * scale;
+                    ctx.strokeRect(x, y, step, step);
+                    ctx.shadowBlur = 0;
+                }
+
+                // Rashi name with enhanced contrast
+                const isSpecialHouse = h === cast?.arudha || (cast?.janma_lagna?.house === h);
+                ctx.fillStyle = isSpecialHouse ? "#ffe066" : "#e4c44a";
+                ctx.font = `bold ${Math.max(11 * scale, 9)}px serif`;
+                ctx.textAlign = "center";
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 3;
+                ctx.fillText(rashiSanskrit[h - 1], x + step / 2, y + 16 * scale);
+                ctx.shadowBlur = 0;
+
+                // UP/DN count with better contrast and styling
+                ctx.fillStyle = ratio > 0.5 ? "#f0e0b0" : "#c0b090";
+                ctx.font = `bold ${Math.max(9 * scale, 7)}px Arial`;
+                ctx.fillText(`${up}${t.up[0]} / ${dn}${t.dn[0]}`, x + step / 2, y + step - 10 * scale);
+
+                // Planets with enhanced colors and labels
+                housePlanetCounts[h].forEach(([p, d], idx) => {
                     ctx.fillStyle = planetColors[p] || "#fff";
-                    ctx.font = "bold 9px Arial";
-                    const px = x + 10 + (idx % 2) * (step - 20);
-                    const py = y + 28 + Math.floor(idx / 2) * 10;
+                    ctx.font = `bold ${Math.max(10 * scale, 8)}px Arial`;
+                    ctx.shadowColor = planetColors[p] || "#fff";
+                    ctx.shadowBlur = 6;
+                    const px = x + 12 * scale + (idx % 2) * (step - 24 * scale);
+                    const py = y + 32 * scale + Math.floor(idx / 2) * 12 * scale;
                     ctx.textAlign = (idx % 2 === 0) ? "left" : "right";
-                    ctx.fillText(`${i18n[currentLang].planets[p] || p}`, px, py);
+                    ctx.fillText(`${t.planets[p] || p}`, px, py);
+                    ctx.shadowBlur = 0;
+
+                    // Add retrograde indicator
+                    if (d.retrograde) {
+                        ctx.fillStyle = "#ff6b6b";
+                        ctx.font = `bold ${Math.max(7 * scale, 6)}px Arial`;
+                        ctx.fillText("℞", px + (idx % 2 === 0 ? 22 * scale : -22 * scale), py);
+                    }
                 });
                 ctx.textAlign = "center";
 
-                if (cast && h === cast.arudha) drawGoldCoin(x + step - 25, y + 25);
-                if (cast && cast.janma_lagna && cast.janma_lagna.house === h) {
-                    ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 2; ctx.strokeRect(x + 5, y + 5, step - 10, step - 10);
-                    ctx.fillStyle = "#00ff00"; ctx.font = "bold 9px Arial"; ctx.fillText("LAGNA", x + step / 2, y + step - 20);
+                // Arudha marker with enhanced visibility
+                if (cast && h === cast.arudha) {
+                    drawGoldCoin(x + step - 28 * scale, y + 28 * scale, scale * 1.1);
                 }
 
+                // Lagna marker with enhanced visibility
+                if (cast && cast.janma_lagna && cast.janma_lagna.house === h) {
+                    ctx.strokeStyle = "#50dc64";
+                    ctx.lineWidth = 3.5;
+                    ctx.shadowColor = 'rgba(80,220,100,0.5)';
+                    ctx.shadowBlur = 8;
+                    ctx.strokeRect(x + 6 * scale, y + 6 * scale, step - 12 * scale, step - 12 * scale);
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = "#50dc64";
+                    ctx.font = `bold ${Math.max(10 * scale, 8)}px Arial`;
+                    ctx.fillText("LAGNA", x + step / 2, y + step - 22 * scale);
+                }
+
+                // Shells with enhanced drawing
                 shells.forEach((s, idx) => {
                     let sx, sy;
                     if (s.pos) {
-                        sx = x + 10 + (s.pos[0] / 100) * (step - 20);
-                        sy = y + 40 + (s.pos[1] / 100) * (step - 60);
-                    } else {
-                        sx = x + 12 + (idx % 5) * 18;
-                        sy = y + 40 + Math.floor(idx / 5) * 10;
+                        sx = x + 12 * scale + (s.pos[0] / 100) * (step - 24 * scale);
+                        sy = y + 45 * scale + (s.pos[1] / 100) * (step - 70 * scale);
                     }
-                    if (sy < y + step - 15) drawShell(sx, sy, s.up === "UP");
+                    else {
+                        sx = x + 14 * scale + (idx % 5) * 20 * scale;
+                        sy = y + 45 * scale + Math.floor(idx / 5) * 11 * scale;
+                    }
+                    if (sy < y + step - 18 * scale) {
+                        // Enhanced shell drawing with shadows
+                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                        ctx.shadowBlur = 2;
+                        drawShell(sx, sy, s.up === "UP", scale);
+                        ctx.shadowBlur = 0;
+                    }
                 });
             }
-            ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 3; ctx.strokeRect(0, 0, size, size);
-            ctx.fillStyle = "#d4af37"; ctx.font = "30px serif"; ctx.fillText("ॐ", size / 2, size / 2 + 10);
+
+            // Main border with enhanced styling
+            ctx.strokeStyle = highContrast ? "#ffff00" : "#e4c44a";
+            ctx.lineWidth = 5;
+            ctx.shadowColor = highContrast ? 'rgba(255,255,0,0.2)' : 'rgba(228,196,74,0.15)';
+            ctx.shadowBlur = 15;
+            ctx.strokeRect(0, 0, size, size);
+            ctx.shadowBlur = 0;
+
+            // Center Om with glow
+            ctx.fillStyle = highContrast ? "#ffff00" : "#e4c44a";
+            ctx.font = `${32 * scale}px serif`;
+            ctx.shadowColor = highContrast ? 'rgba(255,255,0,0.4)' : 'rgba(228,196,74,0.3)';
+            ctx.shadowBlur = 20;
+            ctx.fillText("ॐ", size / 2, size / 2 + 10 * scale);
+            ctx.shadowBlur = 0;
         }
 
-        // History
-        function saveSession(data) { let h = JSON.parse(localStorage.getItem('rishi_history') || '[]'); h.unshift({ ...data, timestamp: Date.now() }); localStorage.setItem('rishi_history', JSON.stringify(h)); }
+        // ========================================
+        // HISTORY SYSTEM
+        // ========================================
+        function saveSession(data) {
+            let h = JSON.parse(localStorage.getItem('rishi_history') || '[]');
+            const entry = {
+                ...data,
+                lang: currentLang,
+                timestamp: Date.now(),
+                translations: {}
+            };
+            entry.translations[currentLang] = {
+                structure: data.structure,
+                advice: data.advice
+            };
+            h.unshift(entry);
+            localStorage.setItem('rishi_history', JSON.stringify(h));
+            if (window.LAST_CAST) window.LAST_CAST.timestamp = entry.timestamp;
+        }
+
         function getMemoryHistory() {
             const mins = parseInt(document.getElementById('memoryMins').value) || 30;
             const h = JSON.parse(localStorage.getItem('rishi_history') || '[]');
             const now = Date.now();
-            return h.filter(x => x.timestamp > now - (mins * 60000)).map(x => ({
+
+            const resetTimeStr = localStorage.getItem('rishi_memory_reset');
+            const resetTime = resetTimeStr ? parseInt(resetTimeStr) : 0;
+            const timeWindowStart = Math.max(now - (mins * 60000), resetTime);
+
+            return h.filter(x => x.timestamp > timeWindowStart).map(x => ({
                 time_ago: `${Math.round((now - x.timestamp) / 60000)}m ago`,
                 question: x.cast.question,
                 technical_summary: x.structure?.analysis_title,
                 spiritual_prediction: x.advice?.final_prediction || x.advice?.spiritual_guidance?.final_prediction
             }));
         }
-        function toggleExplorer() { const e = document.getElementById('history-explorer'); e.style.display = e.style.display === 'block' ? 'none' : 'block'; if (e.style.display === 'block') renderHistory(); }
-        function renderHistory() { const l = document.getElementById('history-list'); const h = JSON.parse(localStorage.getItem('rishi_history') || '[]'); l.innerHTML = h.map((x, i) => `<div class="history-item" onclick="viewHistoryItem(${i})"><strong>${new Date(x.timestamp).toLocaleString()}</strong> - ${x.cast.question || 'General'}</div>`).join('') || '<p>No history.</p>'; }
-        function viewHistoryItem(i) {
+
+        function toggleExplorer() {
+            const e = document.getElementById('history-explorer');
+            e.style.display = e.style.display === 'block' ? 'none' : 'block';
+            if (e.style.display === 'block') renderHistory();
+        }
+
+        function renderHistory() {
+            const l = document.getElementById('history-list');
+            const h = JSON.parse(localStorage.getItem('rishi_history') || '[]');
+            l.innerHTML = h.map((x, i) => `
+                <div class="history-item" onclick="viewHistoryItem(${i})" tabindex="0" role="button" aria-label="View reading from ${new Date(x.timestamp).toLocaleString()}">
+                    <strong>${new Date(x.timestamp).toLocaleString()} (${x.lang})</strong><br>
+                    <span style="color: #888;">${x.cast.question || 'General'}</span>
+                </div>
+            `).join('') || '<p style="text-align:center; color:#888;">No history.</p>';
+        }
+
+        async function viewHistoryItem(i) {
             const x = JSON.parse(localStorage.getItem('rishi_history'))[i];
+            const displayLang = currentLang;
+
+            let structure = x.structure;
+            let advice = x.advice;
+
+            if (x.translations && x.translations[displayLang]) {
+                structure = x.translations[displayLang].structure;
+                advice = x.translations[displayLang].advice;
+            } else if (x.lang !== displayLang) {
+                const overlay = document.getElementById('translation-overlay');
+                const overlayText = document.getElementById('translation-text');
+                overlay.style.display = 'flex';
+                overlayText.textContent = i18n[displayLang].translating;
+
+                try {
+                    structure = await fetchTranslation(x.structure, displayLang, 'structure');
+                    advice = await fetchTranslation(x.advice, displayLang, 'advice');
+                    if (!x.translations) x.translations = {};
+                    x.translations[displayLang] = { structure, advice };
+                    let history = JSON.parse(localStorage.getItem('rishi_history') || '[]');
+                    history[i] = x;
+                    localStorage.setItem('rishi_history', JSON.stringify(history));
+                    showToast(i18n[displayLang].translatedSuccess, 'success');
+                } catch (err) {
+                    showToast(i18n[displayLang].translationError, 'warning');
+                } finally {
+                    overlay.style.display = 'none';
+                }
+            }
+
             const b = document.getElementById('modalBody');
-            b.innerHTML = `<h3>${x.cast.question || 'Reading'}</h3><p>${new Date(x.timestamp).toLocaleString()}</p><hr><div id="hist-struct"></div><div id="hist-advice"></div>`;
-            renderStructureUI(x.structure, 'hist-struct');
-            renderAdviceUI(x.advice, 'hist-advice');
+            b.innerHTML = `
+                <h3 style="margin-top:0; color:var(--gold); font-size: clamp(1rem, 4vw, 1.2rem);">${x.cast.question || 'Reading'}</h3>
+                <p style="color:#888; font-size: 0.85rem;">${new Date(x.timestamp).toLocaleString()}</p>
+                <hr style="border-color: var(--accent); margin: 15px 0;">
+                <div id="hist-struct"></div>
+                <div id="hist-advice"></div>
+            `;
+            renderStructureUI(structure, 'hist-struct');
+            renderAdviceUI(advice, 'hist-advice');
             document.getElementById('historyModal').style.display = 'flex';
         }
+
         function closeModal() { document.getElementById('historyModal').style.display = 'none'; }
-        function clearHistory() { if (confirm('Clear?')) { localStorage.removeItem('rishi_history'); renderHistory(); } }
+
+        function clearHistory() {
+            if (confirm(i18n[currentLang].clear + '?')) {
+                localStorage.removeItem('rishi_history');
+                renderHistory();
+                showToast(i18n[currentLang].clear + ' ✓', 'success', 2000);
+            }
+        }
+
+        function clearMemory() {
+            localStorage.setItem('rishi_memory_reset', Date.now().toString());
+            showToast(i18n[currentLang].clearMemory + ' ✓', 'success', 3000);
+        }
 
         function renderStructureUI(struct, containerId) {
             const container = document.getElementById(containerId);
-            document.getElementById("struct-title").innerText = struct.analysis_title || "Celestial Structure";
+            const titleEl = document.getElementById("struct-title");
+            if (titleEl) titleEl.innerText = struct.analysis_title || "Celestial Structure";
             const sections = struct.sections || [];
             container.innerHTML = sections.map(s => `
                 <div class="narrative-section">
@@ -569,7 +3100,8 @@
         function renderAdviceUI(advice, containerId) {
             const container = document.getElementById(containerId);
             const adv = advice.spiritual_guidance || advice;
-            document.getElementById("advice-title").innerText = adv.counsel_title || "Spiritual Guidance";
+            const titleEl = document.getElementById("advice-title");
+            if (titleEl) titleEl.innerText = adv.counsel_title || "Spiritual Guidance";
             const narr = adv.guidance_narrative || adv.narrative_sections || [];
             const rems = adv.specific_remedies || [];
             container.innerHTML = narr.map(s => `
@@ -579,30 +3111,42 @@
                 </div>`).join("") + `
                 <div class="narrative-section">
                     <span class="narrative-title">Sacred Remedies</span>
-                    <ul style="padding-left:20px">${rems.map(r => `<li class="remedy-item">${r}</li>`).join("")}</ul>
+                    <ul style="padding-left:20px; margin: 10px 0;">${rems.map(r => `<li class="remedy-item">${r}</li>`).join("")}</ul>
                 </div>
-                <div class="insight-box" style="color:var(--saffron); border-color:var(--saffron)">
+                <div class="insight-box">
                     <strong>Final Prediction:</strong> ${adv.final_prediction}
                 </div>`;
         }
 
+        // ========================================
+        // ANIMATION & RITUAL
+        // ========================================
         async function runMeditation() {
+            skipMeditationFlag = false;
             const overlay = document.getElementById('meditation-overlay');
             const status = document.getElementById('meditation-status');
             const symbols = [document.getElementById('t1'), document.getElementById('t2'), document.getElementById('t3'), document.getElementById('t4'), document.getElementById('t5')];
-            const duration = (Math.floor(Math.random() * (46 - 21 + 1)) + 21) * 1000;
+            const duration = isMobile ? 8000 : ((Math.floor(Math.random() * (46 - 21 + 1)) + 21) * 1000);
             overlay.style.display = 'flex';
             const start = Date.now();
             return new Promise(resolve => {
                 function frame() {
+                    if (skipMeditationFlag) {
+                        resolve();
+                        return;
+                    }
                     const elapsed = Date.now() - start;
                     const progress = elapsed / duration;
                     if (progress < 1) {
+                        const centerX = window.innerWidth / 2;
+                        const centerY = window.innerHeight / 2;
+                        const maxRadius = Math.min(window.innerWidth, window.innerHeight) / 3;
+
                         symbols.forEach((s, i) => {
                             const angle = (progress * Math.PI * 10) + (i * (Math.PI * 2 / 5));
-                            const radius = (1 - progress) * (window.innerWidth / 3) + 50;
-                            const x = Math.cos(angle) * radius + window.innerWidth / 2;
-                            const y = Math.sin(angle) * radius + window.innerHeight / 2;
+                            const radius = (1 - progress) * maxRadius + 50;
+                            const x = Math.cos(angle) * radius + centerX;
+                            const y = Math.sin(angle) * radius + centerY;
                             s.style.left = (x - 15) + 'px';
                             s.style.top = (y - 15) + 'px';
                             s.style.opacity = Math.max(0, 1 - progress);
@@ -624,9 +3168,13 @@
             return {
                 start: () => {
                     function f() {
+                        const centerX = window.innerWidth / 2;
+                        const centerY = window.innerHeight / 2;
+                        const maxOffset = Math.min(window.innerWidth, window.innerHeight) / 4;
+
                         const t = (Date.now() - start) / 2000;
-                        const x = Math.sin(t * 3) * Math.cos(t * 2) * 200 + window.innerWidth / 2;
-                        const y = Math.cos(t * 3) * Math.sin(t * 2) * 200 + window.innerHeight / 2;
+                        const x = Math.sin(t * 3) * Math.cos(t * 2) * maxOffset + centerX;
+                        const y = Math.cos(t * 3) * Math.sin(t * 2) * maxOffset + centerY;
                         point.style.left = x + 'px';
                         point.style.top = y + 'px';
                         animId = requestAnimationFrame(f);
@@ -660,16 +3208,31 @@
                 const bits = [...nist.pulse.outputValue].map(h => parseInt(h, 16).toString(2).padStart(4, "0")).join("");
                 const cast = await fetch(`${API_BASE}/cast`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bits, q, lang: currentLang, birth: b.lat ? b : undefined, prasna: p.lat ? p : undefined }) }).then(r => r.json());
 
-                drawChart(cast, cast.transit_planets);
+                window.LAST_CAST = cast;
+                window.CURRENT_INTERP = { structure: null, advice: null };
+                resizeCanvas();
 
-                const struct = await fetch(`${API_BASE}/interpret/structure`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast, history: getMemoryHistory() }) }).then(r => r.json());
+                const struct = await fetch(`${API_BASE}/interpret/structure`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast, history: getMemoryHistory(), lang: currentLang }) }).then(r => r.json());
+                window.CURRENT_INTERP.structure = struct;
                 renderStructureUI(struct, 'structure-content');
 
-                const advice = await fetch(`${API_BASE}/interpret/advice`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast, structure: struct, history: getMemoryHistory() }) }).then(r => r.json());
+                const advice = await fetch(`${API_BASE}/interpret/advice`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cast, structure: struct, history: getMemoryHistory(), lang: currentLang }) }).then(r => r.json());
+                window.CURRENT_INTERP.advice = advice;
                 renderAdviceUI(advice, 'advice-content');
 
                 document.getElementById("results").style.display = "block";
-                saveSession({ cast, structure: struct, advice });
+                document.getElementById("chart-actions").style.display = "flex";
+                document.getElementById("chart-legend").style.display = "flex";
+
+                const sessionData = { cast, structure: struct, advice };
+                sessionData.translations = { [currentLang]: { structure: struct, advice: advice } };
+                saveSession(sessionData);
+
+                if (isMobile) {
+                    setTimeout(() => {
+                        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
 
                 pointAnim.stop();
                 waitOverlay.style.display = 'none';
@@ -677,14 +3240,143 @@
 
             } catch (err) {
                 console.error(err);
-                alert("Ritual interrupted.");
+                showToast("Ritual interrupted. Please try again.", 'warning', 5000);
                 pointAnim.stop();
                 waitOverlay.style.display = 'none';
                 app.classList.remove('app-blurred');
             }
         }
 
-        drawChart(null);
+        // ========================================
+        // INITIALIZATION - Enhanced
+        // ========================================
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeTimer);
+            window.resizeTimer = setTimeout(resizeCanvas, 100);
+        });
+
+        window.addEventListener('load', () => {
+            loadAccessibilitySettings();
+            const savedLang = localStorage.getItem('rishi_language') || 'en';
+            setLang(savedLang);
+            resizeCanvas();
+
+            // Announce page load to screen readers
+            const announcement = document.createElement('div');
+            announcement.setAttribute('role', 'status');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.className = 'sr-only';
+            announcement.textContent = 'Rishi Ashtamangala Prasna application loaded. Use Tab key to navigate.';
+            document.body.appendChild(announcement);
+            setTimeout(() => announcement.remove(), 3000);
+        });
+
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            // Escape key to close modals and overlays
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('historyModal');
+                const medOverlay = document.getElementById('meditation-overlay');
+                const waitOverlay = document.getElementById('waiting-overlay');
+
+                if (modal.style.display === 'flex') {
+                    closeModal();
+                } else if (medOverlay.style.display === 'flex') {
+                    skipMeditation();
+                }
+            }
+
+            // Focus trap for modals
+            if (e.key === 'Tab') {
+                const modal = document.getElementById('historyModal');
+                if (modal.style.display === 'flex') {
+                    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                    const firstFocusable = focusableElements[0];
+                    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+                    if (e.shiftKey && document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            }
+        });
+
+        // Prevent double-tap zoom on buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', function (e) {
+                e.preventDefault();
+                this.click();
+            }, { passive: false });
+        });
+
+        // Enhanced keyboard navigation for collapsible headers
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+
+        // Canvas mouse tracking for tooltips
+        const canvasTooltip = document.getElementById('canvas-tooltip');
+
+        if (canvas && canvasTooltip) {
+            canvas.addEventListener('mousemove', (e) => {
+                if (!window.LAST_CAST) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const step = rect.width / 4;
+
+                // Determine which house is being hovered
+                const col = Math.floor(x / step);
+                const row = Math.floor(y / step);
+
+                // Map coordinates to house number
+                let house = null;
+                for (let h = 1; h <= 12; h++) {
+                    const [cx, cy] = houseCoords[h];
+                    if (cx === col && cy === row) {
+                        house = h;
+                        break;
+                    }
+                }
+
+                if (house) {
+                    const t = i18n[currentLang];
+                    const transitPlanets = window.LAST_CAST.transit_planets || {};
+                    const planetsInHouse = Object.entries(transitPlanets)
+                        .filter(([p, d]) => d.house === house)
+                        .map(([p, d]) => t.planets[p] || p);
+
+                    let tooltipText = `${t.planets?.[rashiSanskrit[house - 1]] || rashiSanskrit[house - 1]} (House ${house})`;
+                    if (planetsInHouse.length > 0) {
+                        tooltipText += `\nPlanets: ${planetsInHouse.join(', ')}`;
+                    }
+
+                    canvasTooltip.textContent = tooltipText;
+                    canvasTooltip.style.left = (e.pageX + 10) + 'px';
+                    canvasTooltip.style.top = (e.pageY - 30) + 'px';
+                    canvasTooltip.classList.add('visible');
+                    canvasTooltip.setAttribute('aria-hidden', 'false');
+                } else {
+                    canvasTooltip.classList.remove('visible');
+                    canvasTooltip.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                canvasTooltip.classList.remove('visible');
+                canvasTooltip.setAttribute('aria-hidden', 'true');
+            });
+        }
     </script>
 </body>
 
