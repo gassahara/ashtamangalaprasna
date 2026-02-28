@@ -1,1 +1,9 @@
 project_id = "rishi-ashtamangala"
+
+[functions.disperse]
+enabled = true
+verify_jwt = false
+
+# Routes all /distribute requests to the disperse function
+[functions.distribute]
+enabled = false  # Disabled - use disperse/distribute instead

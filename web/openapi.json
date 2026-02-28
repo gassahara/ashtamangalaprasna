@@ -1,0 +1,882 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Spatial Disperse API",
+    "description": "Simulates spatial distribution of geometric shapes (circles, polygons) in a constrained grid using cryptographically secure randomness. Implements a Markov chain with bounce physics for hole constraints. Features per-step rotation and mirror randomization, and NIST Randomness Beacon integration.",
+    "version": "2.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{project-ref}.supabase.co/functions/v1",
+      "description": "Supabase Edge Function",
+      "variables": {
+        "project-ref": {
+          "description": "Your Supabase project reference",
+          "default": "your-project-ref"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/beacon": {
+      "get": {
+        "summary": "Fetch a 512-bit beacon from external source",
+        "description": "Fetches a 512-bit (128 hex character) beacon from an external URL (default: NIST Randomness Beacon). Returns the beacon value that can be used as a seed for the /disperse endpoint. If the external source is unavailable, generates local entropy.",
+        "operationId": "getBeacon",
+        "tags": ["Beacon"],
+        "responses": {
+          "200": {
+            "description": "Successful beacon fetch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeaconResponse"
+                },
+                "example": {
+                  "success": true,
+                  "beacon": {
+                    "value": "a1b2c3d4e5f6...",
+                    "hex": "a1b2c3d4e5f6...",
+                    "bits": 512,
+                    "bytes": 64,
+                    "source": "external",
+                    "url": "https://beacon.nist.gov/beacon/2.0/pulse/last"
+                  },
+                  "seed": "a1b2c3d4e5f6...",
+                  "usage": {
+                    "endpoint": "/disperse",
+                    "parameter": "seed",
+                    "description": "Pass this seed value to the /disperse endpoint"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chacha20/derive": {
+      "post": {
+        "summary": "Derive deterministic bitstring using ChaCha20RNG",
+        "description": "Takes a 512-bit seed and 256-bit input to produce an N-length bitstring using ChaCha20-like deterministic mixing. This provides a sound hash function suitable for key derivation, verifiable randomness, and deterministic bitstring generation. Same seed + input always produces the same output.",
+        "operationId": "chacha20Derive",
+        "tags": ["ChaCha20RNG"],
+        "requestBody": {
+          "required": true,
+          "description": "Derivation parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChaCha20DeriveRequest"
+              },
+              "examples": {
+                "derive-256": {
+                  "summary": "Derive 256 bits",
+                  "value": {
+                    "seed": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6",
+                    "input": "e5f6a1b2c3d4e5f6e5f6a1b2c3d4e5f6e5f6a1b2c3d4e5f6e5f6a1b2c3d4e5f6",
+                    "n_bits": 256
+                  }
+                },
+                "derive-512": {
+                  "summary": "Derive 512 bits",
+                  "value": {
+                    "seed": "11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff",
+                    "input": "aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899",
+                    "n_bits": 512
+                  }
+                },
+                "derive-1024": {
+                  "summary": "Derive 1024 bits",
+                  "value": {
+                    "seed": "deadbeef" * 16,
+                    "input": "cafebabe" * 8,
+                    "n_bits": 1024
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful derivation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaCha20DeriveResponse"
+                },
+                "example": {
+                  "success": true,
+                  "parameters": {
+                    "seed": "a1b2c3d4...",
+                    "input": "e5f6a1b2...",
+                    "n_bits": 256,
+                    "n_bytes": 32
+                  },
+                  "output": {
+                    "hex": "fd9f86f11940e55a81dc416a947725c1...",
+                    "bits": 256,
+                    "bytes": 32
+                  },
+                  "algorithm": {
+                    "name": "ChaCha20Deriver",
+                    "description": "Deterministic bitstring derivation using ChaCha20-like mixing with SHA-512",
+                    "seed_bits": 512,
+                    "input_bits": 256
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Seed must be 128 hex characters (512 bits)"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disperse": {
+      "post": {
+        "summary": "Run spatial distribution simulation",
+        "description": "Distributes N shapes across an S×S grid with optional constraints (lines, holes). Uses hybrid CSPRNG for randomness seeded by a 512-bit beacon. Implements bounce physics for hole boundaries. Supports per-step rotation and mirror randomization for non-symmetrical polygons.",
+        "operationId": "disperse",
+        "tags": ["Simulation"],
+        "requestBody": {
+          "required": true,
+          "description": "Simulation parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisperseRequest"
+              },
+              "examples": {
+                "simple-circle": {
+                  "summary": "Simple circle distribution",
+                  "value": {
+                    "N": 100,
+                    "steps": 50,
+                    "R_grid": 50,
+                    "s_grid": 500,
+                    "num_sides": 0,
+                    "shape_params": [5]
+                  }
+                },
+                "with-beacon-seed": {
+                  "summary": "Using beacon seed for reproducibility",
+                  "value": {
+                    "N": 50,
+                    "steps": 30,
+                    "R_grid": 30,
+                    "s_grid": 100,
+                    "num_sides": 0,
+                    "shape_params": [3],
+                    "seed": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"
+                  }
+                },
+                "line-with-rotation": {
+                  "summary": "Line segments with per-step rotation",
+                  "value": {
+                    "N": 50,
+                    "steps": 100,
+                    "R_grid": 40,
+                    "s_grid": 200,
+                    "num_sides": 2,
+                    "edges": [25],
+                    "num_rotations": 4,
+                    "enable_mirror": true
+                  }
+                },
+                "hexagon-with-hole": {
+                  "summary": "Hexagons with central hole",
+                  "value": {
+                    "N": 108,
+                    "steps": 200,
+                    "R_grid": 64,
+                    "s_grid": 64,
+                    "num_sides": 6,
+                    "shape_params": [1, 2, 1, 1, 2],
+                    "v_lines": [21, 41],
+                    "h_lines": [21, 41],
+                    "holes": [[1, 1]]
+                  }
+                },
+                "triangle-with-orientation": {
+                  "summary": "Triangles with rotation and mirror",
+                  "value": {
+                    "N": 30,
+                    "steps": 50,
+                    "R_grid": 35,
+                    "s_grid": 150,
+                    "num_sides": 3,
+                    "edges": [12, 10],
+                    "num_rotations": 8,
+                    "enable_mirror": true,
+                    "vertical_lines": [50, 100],
+                    "horizontal_lines": [50, 100]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful simulation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisperseResponse"
+                },
+                "example": {
+                  "success": true,
+                  "parameters": {
+                    "N": 100,
+                    "steps": 50,
+                    "R_grid": 50,
+                    "s_grid": 500,
+                    "num_sides": 3,
+                    "shape_params": [10, 8],
+                    "edges": [10, 8],
+                    "num_rotations": 4,
+                    "enable_mirror": true,
+                    "v_lines": [],
+                    "h_lines": [],
+                    "holes": [],
+                    "seed": "a1b2c3d4e5f6...",
+                    "seed_source": "beacon"
+                  },
+                  "results": {
+                    "total_points": 100,
+                    "points": [
+                      {"id": 1, "x": 250, "y": 180},
+                      {"id": 2, "x": 420, "y": 350}
+                    ],
+                    "orientation_entropy_bits": 150,
+                    "orientation_history_sample": [
+                      {"step": 0, "rotation_index": 2, "rotation_angle": 90.0, "mirror": false}
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Seed must be a valid hexadecimal string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BeaconResponse": {
+        "type": "object",
+        "required": ["success", "beacon", "seed", "usage"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the beacon was fetched successfully",
+            "example": true
+          },
+          "beacon": {
+            "type": "object",
+            "required": ["value", "hex", "bits", "bytes", "source"],
+            "properties": {
+              "value": {
+                "type": "string",
+                "description": "The 512-bit beacon value as 128 hex characters",
+                "pattern": "^[0-9a-f]{128}$",
+                "example": "a1b2c3d4e5f6..."
+              },
+              "hex": {
+                "type": "string",
+                "description": "Alias for value - the beacon in hex format",
+                "example": "a1b2c3d4e5f6..."
+              },
+              "bits": {
+                "type": "integer",
+                "description": "Number of bits in the beacon",
+                "example": 512
+              },
+              "bytes": {
+                "type": "integer",
+                "description": "Number of bytes in the beacon",
+                "example": 64
+              },
+              "source": {
+                "type": "string",
+                "description": "Source of the beacon: 'external' if fetched from URL, 'generated' if locally generated",
+                "enum": ["external", "generated"],
+                "example": "external"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL the beacon was fetched from (if source is external)",
+                "example": "https://beacon.nist.gov/beacon/2.0/pulse/last"
+              }
+            }
+          },
+          "seed": {
+            "type": "string",
+            "description": "The beacon value formatted as a seed for the /disperse endpoint",
+            "example": "a1b2c3d4e5f6..."
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "endpoint": {
+                "type": "string",
+                "example": "/disperse"
+              },
+              "parameter": {
+                "type": "string",
+                "example": "seed"
+              },
+              "description": {
+                "type": "string",
+                "example": "Pass this seed value to the /disperse endpoint"
+              }
+            }
+          }
+        }
+      },
+      "DisperseRequest": {
+        "type": "object",
+        "required": ["N", "steps", "R_grid", "s_grid", "num_sides", "shape_params"],
+        "properties": {
+          "N": {
+            "type": "integer",
+            "description": "Number of shapes to distribute",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 100,
+            "example": 108
+          },
+          "steps": {
+            "type": "integer",
+            "description": "Number of simulation steps/iterations",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 50,
+            "example": 200
+          },
+          "R_grid": {
+            "type": "integer",
+            "description": "Capture radius for throw mechanism. Shapes within this radius of the random center are captured and thrown.",
+            "minimum": 1,
+            "maximum": 65536,
+            "default": 50,
+            "example": 64
+          },
+          "s_grid": {
+            "type": "integer",
+            "description": "Grid size S×S. All coordinates are in [0, s_grid).",
+            "minimum": 1,
+            "maximum": 65536,
+            "default": 500,
+            "example": 64
+          },
+          "num_sides": {
+            "type": "integer",
+            "description": "Number of sides for shape type. 0=circle, 2=line, 3=triangle, 4=quadrilateral, 5=pentagon, 6=hexagon, etc.",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0,
+            "example": 6
+          },
+          "shape_params": {
+            "type": "array",
+            "description": "Shape parameters. For circle: [radius]. For polygon: [side1, side2, ...] where num_sides-1 sides are specified and the last is determined geometrically.",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 1,
+            "example": [1, 2, 1, 1, 2]
+          },
+          "edges": {
+            "type": "array",
+            "description": "Alias for shape_params. Shape side lengths or radius.",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 1,
+            "example": [10, 8]
+          },
+          "num_rotations": {
+            "type": "integer",
+            "description": "Number of allowed rotation positions for per-step orientation randomization. Rotations divide 180° (e.g., 2=0°/90°, 4=0°/45°/90°/135°). Set to 1 for no rotation.",
+            "minimum": 1,
+            "maximum": 360,
+            "default": 1,
+            "example": 4
+          },
+          "enable_mirror": {
+            "type": "boolean",
+            "description": "Enable per-step mirror/flipping randomization. When true, each step randomly chooses between normal and mirrored orientation.",
+            "default": false,
+            "example": true
+          },
+          "v_lines": {
+            "type": "array",
+            "description": "Vertical grid line positions (X coordinates). Divide grid into columns.",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "default": [],
+            "example": [21, 41]
+          },
+          "vertical_lines": {
+            "type": "array",
+            "description": "Alias for v_lines. Vertical grid line positions.",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "default": [],
+            "example": [21, 41]
+          },
+          "h_lines": {
+            "type": "array",
+            "description": "Horizontal grid line positions (Y coordinates). Divide grid into rows.",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "default": [],
+            "example": [21, 41]
+          },
+          "horizontal_lines": {
+            "type": "array",
+            "description": "Alias for h_lines. Horizontal grid line positions.",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "default": [],
+            "example": [21, 41]
+          },
+          "holes": {
+            "type": "array",
+            "description": "Hole cells specified as [[row, col], ...]. These cells are forbidden zones - shapes cannot enter.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "default": [],
+            "example": [[1, 1]]
+          },
+          "forbidden_cells": {
+            "type": "array",
+            "description": "Alias for holes. Forbidden cells as [[row, col], ...].",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "default": [],
+            "example": [[1, 1]]
+          },
+          "seed": {
+            "type": "string",
+            "description": "512-bit beacon seed for reproducibility as hex string (128 characters). Shorter seeds will be extended to 512 bits using SHA-256. Get a seed from the /beacon endpoint.",
+            "pattern": "^[0-9a-fA-F]+$",
+            "minLength": 1,
+            "maxLength": 128,
+            "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"
+          },
+          "entropy_seed": {
+            "type": "string",
+            "description": "Legacy alias for 'seed'. Deprecated, use 'seed' instead.",
+            "pattern": "^[0-9a-fA-F]+$"
+          }
+        }
+      },
+      "DisperseResponse": {
+        "type": "object",
+        "required": ["success", "parameters", "results"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the simulation completed successfully",
+            "example": true
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/Parameters"
+          },
+          "results": {
+            "$ref": "#/components/schemas/Results"
+          }
+        }
+      },
+      "Parameters": {
+        "type": "object",
+        "required": ["N", "steps", "R_grid", "s_grid", "num_sides", "shape_params", "v_lines", "h_lines", "holes"],
+        "properties": {
+          "N": {
+            "type": "integer",
+            "example": 108
+          },
+          "steps": {
+            "type": "integer",
+            "example": 200
+          },
+          "R_grid": {
+            "type": "integer",
+            "example": 64
+          },
+          "s_grid": {
+            "type": "integer",
+            "example": 64
+          },
+          "num_sides": {
+            "type": "integer",
+            "example": 6
+          },
+          "shape_params": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [1, 2, 1, 1, 2]
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [1, 2, 1, 1, 2]
+          },
+          "num_rotations": {
+            "type": "integer",
+            "example": 4
+          },
+          "enable_mirror": {
+            "type": "boolean",
+            "example": true
+          },
+          "v_lines": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [21, 41]
+          },
+          "h_lines": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [21, 41]
+          },
+          "holes": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "example": [[1, 1]]
+          },
+          "seed": {
+            "type": "string",
+            "description": "The 512-bit beacon seed used for this simulation (if provided)",
+            "example": "a1b2c3d4e5f6..."
+          },
+          "seed_source": {
+            "type": "string",
+            "description": "Source of the seed: 'beacon' if user-provided, 'local_entropy' if auto-generated",
+            "enum": ["beacon", "local_entropy"],
+            "example": "beacon"
+          }
+        }
+      },
+      "Results": {
+        "type": "object",
+        "required": ["total_points", "points"],
+        "properties": {
+          "total_points": {
+            "type": "integer",
+            "description": "Total number of points generated (equals N)",
+            "example": 108
+          },
+          "points": {
+            "type": "array",
+            "description": "List of generated points with coordinates",
+            "items": {
+              "$ref": "#/components/schemas/Point"
+            }
+          },
+          "orientation_entropy_bits": {
+            "type": "integer",
+            "description": "Bits of entropy consumed by per-step rotation and mirror randomization",
+            "example": 150
+          },
+          "orientation_history_sample": {
+            "type": "array",
+            "description": "Sample of orientation states per step (first 5 entries)",
+            "items": {
+              "$ref": "#/components/schemas/OrientationState"
+            }
+          }
+        }
+      },
+      "Point": {
+        "type": "object",
+        "required": ["id", "x", "y"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Point identifier (1-indexed)",
+            "example": 1
+          },
+          "x": {
+            "type": "integer",
+            "description": "X coordinate in grid",
+            "minimum": 0,
+            "example": 62
+          },
+          "y": {
+            "type": "integer",
+            "description": "Y coordinate in grid",
+            "minimum": 0,
+            "example": 13
+          }
+        }
+      },
+      "OrientationState": {
+        "type": "object",
+        "description": "Shape orientation state at a specific simulation step",
+        "required": ["step", "rotation_index", "rotation_angle", "mirror"],
+        "properties": {
+          "step": {
+            "type": "integer",
+            "description": "Simulation step number",
+            "example": 0
+          },
+          "rotation_index": {
+            "type": "integer",
+            "description": "Index of rotation position (0 to num_rotations-1)",
+            "example": 2
+          },
+          "rotation_angle": {
+            "type": "number",
+            "description": "Actual rotation angle in degrees",
+            "example": 90.0
+          },
+          "mirror": {
+            "type": "boolean",
+            "description": "Whether shape is mirrored at this step",
+            "example": false
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["success", "error"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Seed must be a valid hexadecimal string"
+          }
+        }
+      },
+      "ChaCha20DeriveRequest": {
+        "type": "object",
+        "required": ["seed", "input", "n_bits"],
+        "properties": {
+          "seed": {
+            "type": "string",
+            "description": "512-bit seed as 128 hex characters. This is the master key for derivation.",
+            "pattern": "^[0-9a-fA-F]{128}$",
+            "minLength": 128,
+            "maxLength": 128,
+            "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"
+          },
+          "input": {
+            "type": "string",
+            "description": "256-bit input data as 64 hex characters. This is mixed with the seed to produce output.",
+            "pattern": "^[0-9a-fA-F]{64}$",
+            "minLength": 64,
+            "maxLength": 64,
+            "example": "e5f6a1b2c3d4e5f6e5f6a1b2c3d4e5f6e5f6a1b2c3d4e5f6e5f6a1b2c3d4e5f6"
+          },
+          "n_bits": {
+            "type": "integer",
+            "description": "Number of bits to derive. Will be rounded up to nearest byte.",
+            "minimum": 1,
+            "maximum": 65536,
+            "default": 256,
+            "example": 256
+          }
+        }
+      },
+      "ChaCha20DeriveResponse": {
+        "type": "object",
+        "required": ["success", "parameters", "output", "algorithm"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "seed": {
+                "type": "string",
+                "description": "Seed used (truncated for display)",
+                "example": "a1b2c3d4..."
+              },
+              "input": {
+                "type": "string",
+                "description": "Input used (truncated for display)",
+                "example": "e5f6a1b2..."
+              },
+              "n_bits": {
+                "type": "integer",
+                "example": 256
+              },
+              "n_bytes": {
+                "type": "integer",
+                "example": 32
+              }
+            }
+          },
+          "output": {
+            "type": "object",
+            "required": ["hex", "bits", "bytes"],
+            "properties": {
+              "hex": {
+                "type": "string",
+                "description": "Derived bits as hex string",
+                "example": "fd9f86f11940e55a81dc416a947725c1..."
+              },
+              "bits": {
+                "type": "integer",
+                "description": "Number of bits in output",
+                "example": 256
+              },
+              "bytes": {
+                "type": "integer",
+                "description": "Number of bytes in output",
+                "example": 32
+              }
+            }
+          },
+          "algorithm": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "ChaCha20Deriver"
+              },
+              "description": {
+                "type": "string",
+                "example": "Deterministic bitstring derivation using ChaCha20-like mixing with SHA-512"
+              },
+              "seed_bits": {
+                "type": "integer",
+                "example": 512
+              },
+              "input_bits": {
+                "type": "integer",
+                "example": 256
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Beacon",
+      "description": "512-bit beacon retrieval from external sources (NIST Randomness Beacon)"
+    },
+    {
+      "name": "ChaCha20RNG",
+      "description": "Deterministic bitstring derivation using ChaCha20-like mixing for sound hash functions"
+    },
+    {
+      "name": "Simulation",
+      "description": "Spatial distribution simulation operations with per-step orientation support"
+    }
+  ]
+}

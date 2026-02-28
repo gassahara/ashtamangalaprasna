@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#120a06">
-    <meta name="description" content="Rishi Ashtamangala Prasna - Sacred Vedic Astrology Reading">
-    <title>Rishi Ashtamangala Prasna</title>
+    <meta name="description" content="Ashtamangala Prasna - Sacred Vedic Astrology Reading">
+    <title>Ashtamangala Prasna</title>
     <style>
         /* ========================================
            CSS VARIABLES - PRASNA TRADITION COLORS
@@ -225,7 +225,7 @@
             border-radius: 12px;
             margin-bottom: 12px;
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
             box-shadow: var(--shadow-md);
         }
         
@@ -290,7 +290,7 @@
             justify-content: center; 
             margin-bottom: 18px;
             width: 100%; 
-            max-width: 700px;
+            max-width: 800px;
             padding: 0 12px;
         }
         
@@ -331,12 +331,13 @@
         }
 
         .container { 
-            max-width: 1100px; 
+            max-width: 800px; 
             width: 100%; 
             display: grid; 
-            grid-template-columns: 1fr 1fr; 
+            grid-template-columns: 1fr; 
             gap: 15px;
             padding: 0 10px;
+            margin: 0 auto;
         }
         
         @media (max-width: 768px) { 
@@ -1039,7 +1040,9 @@
         #history-explorer { 
             margin-top: 36px; 
             width: 100%; 
-            max-width: 1000px; 
+            max-width: 800px; 
+            margin-left: auto;
+            margin-right: auto;
             display: none;
             padding: 0 12px;
         }
@@ -1396,7 +1399,7 @@
     </div>
 
     <div id="main-app" role="main">
-        <h1 id="main-title">Rishi Ashtamangala</h1>
+        <h1 id="main-title">Ashtamangala Prasna</h1>
         
         <!-- Accessibility Controls - Enhanced -->
         <div class="accessibility-bar" role="toolbar" aria-label="Accessibility options">
@@ -1444,13 +1447,14 @@
             <button class="action-btn" id="btn-history" onclick="toggleExplorer()">📜 History</button>
             <button class="action-btn" id="btn-clear-history-top" onclick="clearHistory()" style="color:#ff6b6b; border-color:#ff6b6b;">🗑️ Clear History</button>
             <button class="action-btn" id="btn-clear-memory" onclick="clearMemory()" style="color:var(--saffron); border-color:var(--saffron);">🧹 Clear Memory</button>
+            <a href="prasna-chakra.html" class="action-btn" style="text-decoration:none; color:var(--gold); border-color:var(--gold);">⚛️ Prasna Chakra</a>
             <div style="display:flex; align-items:center; gap:8px; font-size:0.75rem;">
                 <span id="lbl-memory">Memory (min):</span>
                 <input type="number" id="memoryMins" value="30" min="1" max="1440" aria-label="Memory time in minutes">
             </div>
         </div>
 
-        <div class="input-group" style="width:100%; max-width:650px;">
+        <div class="input-group" style="width:100%; max-width:800px;">
             <!-- Collapsible Query Section with Action -->
             <div class="collapsible-header" onclick="toggleSection('query-section')" role="button" tabindex="0" aria-expanded="true" aria-controls="query-section" id="header-query-section">
                 <span class="collapsible-title" id="lbl-query-title">
@@ -1473,7 +1477,7 @@
                 <span class="collapsible-arrow" id="arrow-input-panels" aria-hidden="true">▼</span>
             </div>
             <div id="input-panels" class="collapsible-content" role="region" aria-labelledby="header-input-panels">
-                <div class="container input-panels-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
+                <div class="container input-panels-grid" style="margin-bottom: 10px;">
                     <!-- Janma (Birth) Panel -->
                     <div class="card input-card" style="padding:14px;">
                         <div class="input-card-header">
@@ -2130,7 +2134,7 @@
                 exportCtx.fillStyle = '#d4af37';
                 exportCtx.font = 'bold 32px Palatino, Georgia, serif';
                 exportCtx.textAlign = 'center';
-                exportCtx.fillText('RISHI ASHTAMANGALA PRASNA', exportCanvas.width / 2, 60);
+                exportCtx.fillText('ASHTAMANGALA PRASNA', exportCanvas.width / 2, 60);
                 
                 const question = window.LAST_CAST.question || 'General Reading';
                 exportCtx.font = 'italic 20px Palatino, Georgia, serif';
@@ -2463,16 +2467,18 @@
             
             const overlay = document.getElementById('translation-overlay');
             const overlayText = document.getElementById('translation-text');
-            overlay.style.display = 'flex';
-            overlayText.textContent = i18n[toLang].translating;
+            if (overlay) overlay.style.display = 'flex';
+            if (overlayText) overlayText.textContent = i18n[toLang].translating;
             
-            document.getElementById('structure-content').classList.add('translating');
-            document.getElementById('advice-content').classList.add('translating');
+            const structContent = document.getElementById('structure-content');
+            const adviceContent = document.getElementById('advice-content');
+            if (structContent) structContent.classList.add('translating');
+            if (adviceContent) adviceContent.classList.add('translating');
             
             const indicator = document.getElementById('translating-indicator');
             const indicatorText = document.getElementById('translating-text');
-            indicator.classList.remove('hidden');
-            indicatorText.textContent = i18n[toLang].translating;
+            if (indicator) indicator.classList.remove('hidden');
+            if (indicatorText) indicatorText.textContent = i18n[toLang].translating;
             
             try {
                 const cached = window.LAST_CAST.translations?.[toLang];
@@ -2505,12 +2511,15 @@
                 showToast(i18n[toLang].translationError, 'warning', 5000);
             } finally {
                 isTranslating = false;
-                indicator.classList.add('hidden');
+                if (indicator) indicator.classList.add('hidden');
                 
                 const overlay = document.getElementById('translation-overlay');
-                overlay.style.display = 'none';
-                document.getElementById('structure-content').classList.remove('translating');
-                document.getElementById('advice-content').classList.remove('translating');
+                if (overlay) overlay.style.display = 'none';
+                
+                const structContent = document.getElementById('structure-content');
+                const adviceContent = document.getElementById('advice-content');
+                if (structContent) structContent.classList.remove('translating');
+                if (adviceContent) adviceContent.classList.remove('translating');
             }
         }
 
@@ -3089,7 +3098,7 @@
             announcement.setAttribute('role', 'status');
             announcement.setAttribute('aria-live', 'polite');
             announcement.className = 'sr-only';
-            announcement.textContent = 'Rishi Ashtamangala Prasna application loaded. Use Tab key to navigate.';
+            announcement.textContent = 'Ashtamangala Prasna application loaded. Use Tab key to navigate.';
             document.body.appendChild(announcement);
             setTimeout(() => announcement.remove(), 3000);
         });

@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#120a06">
+    <title>Prasna Chakra - 108 Kavane</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #e4c44a;
+            --gold-bright: #ffe066;
+            --deep-red: #5a0808;
+            --dark-bg: #0d0805;
+            --card-bg: #1e1510;
+            --text: #f8f4ed;
+            --text-muted: #d4c9b0;
+            --accent: #a0522d;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            font-family: 'Palatino', 'Georgia', serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            border-bottom: 3px solid var(--gold);
+            padding-bottom: 10px;
+            text-align: center;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .info-panel {
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .info-panel h3 {
+            color: var(--gold);
+            margin-top: 0;
+        }
+        
+        .params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .param-item {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--gold);
+        }
+        
+        .param-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .param-value {
+            font-size: 1.1rem;
+            color: var(--gold-bright);
+            font-weight: bold;
+        }
+        
+        canvas {
+            background: #050505;
+            border: 4px double var(--gold);
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--deep-red) 0%, #7b1818 100%);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 16px 32px;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #7b1818 0%, var(--deep-red) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(228, 196, 74, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            min-height: 24px;
+        }
+        
+        .beacon-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .beacon-tag {
+            background: rgba(228, 196, 74, 0.15);
+            border: 1px solid var(--gold);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gold);
+        }
+        
+        .hexagon { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+        .hole { background: #000; border: 2px dashed var(--accent); }
+        .kavane { background: var(--gold); }
+        .grid-line { background: rgba(228, 196, 74, 0.5); }
+        
+        /* ========================================
+           CASTING OVERLAY - Vedic Atmosphere
+           ======================================== */
+        #casting-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #1a0f0a 0%, #0a0503 50%, #000 100%);
+            z-index: 9000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: hidden;
+        }
+        
+        #casting-overlay.active {
+            display: flex;
+        }
+        
+        /* Animated stars/background */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(228,196,74,0.8), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(228,196,74,0.6), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 160px 120px, rgba(228,196,74,0.6), transparent),
+                radial-gradient(1px 1px at 230px 80px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(2px 2px at 300px 150px, rgba(228,196,74,0.5), transparent),
+                radial-gradient(1px 1px at 400px 60px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 500px 180px, rgba(228,196,74,0.7), transparent);
+            animation: twinkle 4s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* Sacred Om Symbol */
+        .sacred-om {
+            font-size: clamp(4rem, 15vw, 8rem);
+            color: var(--gold);
+            text-shadow: 0 0 40px rgba(228,196,74,0.6), 0 0 80px rgba(228,196,74,0.3);
+            animation: om-pulse 3s ease-in-out infinite;
+            margin-bottom: 30px;
+            z-index: 9001;
+            position: relative;
+        }
+        
+        @keyframes om-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        /* Rotating chakra/mandala */
+        .mandala {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(228,196,74,0.3);
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+        }
+        
+        .mandala::before {
+            content: '';
+            position: absolute;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            border: 1px solid rgba(228,196,74,0.2);
+            border-radius: 50%;
+            animation: rotate 15s linear infinite reverse;
+        }
+        
+        .mandala::after {
+            content: '';
+            position: absolute;
+            top: 50px; left: 50px; right: 50px; bottom: 50px;
+            border: 1px dashed rgba(228,196,74,0.15);
+            border-radius: 50%;
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            width: 80%;
+            max-width: 500px;
+            height: 6px;
+            background: rgba(228,196,74,0.2);
+            border-radius: 3px;
+            margin: 30px 0;
+            overflow: hidden;
+            position: relative;
+            z-index: 9001;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--saffron));
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(228,196,74,0.5);
+        }
+        
+        /* Verbose status */
+        .verbose-status {
+            color: var(--text-muted);
+            font-size: 1rem;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 30px;
+            font-style: italic;
+            letter-spacing: 1px;
+            z-index: 9001;
+            position: relative;
+        }
+        
+        .verbose-status.step-number {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+        
+        /* Vedic Wisdom Display */
+        .vedic-wisdom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            max-width: calc(100vw - 40px);
+            background: linear-gradient(135deg, rgba(90,8,8,0.95) 0%, rgba(30,21,16,0.98) 100%);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 500;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(228,196,74,0.2);
+        }
+        
+        .vedic-wisdom h4 {
+            color: var(--gold);
+            margin: 0 0 12px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(228,196,74,0.3);
+            padding-bottom: 8px;
+        }
+        
+        .vedic-wisdom .wisdom-text {
+            color: var(--text);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            font-style: italic;
+        }
+        
+        .vedic-wisdom .wisdom-source {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 12px;
+            text-align: right;
+            font-style: normal;
+        }
+        
+        /* Floating animation for wisdom box */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .vedic-wisdom:hover {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Hide on mobile when casting */
+        @media (max-width: 768px) {
+            .vedic-wisdom {
+                position: relative;
+                top: auto;
+                right: auto;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Skip casting button */
+        .skip-casting-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: transparent;
+            border: 1px solid rgba(228,196,74,0.4);
+            color: rgba(228,196,74,0.6);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            z-index: 9002;
+        }
+        
+        .skip-casting-btn:hover {
+            opacity: 1;
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <!-- Casting Overlay with Vedic Atmosphere -->
+    <div id="casting-overlay">
+        <div class="stars"></div>
+        <div class="mandala"></div>
+        <div class="sacred-om">ॐ</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="castingProgress"></div>
+        </div>
+        <div class="verbose-status" id="castingStatus">Preparing sacred space...</div>
+        <button class="skip-casting-btn" onclick="skipCasting()">Skip Animation</button>
+    </div>
+    
+    <!-- Vedic Wisdom Panel -->
+    <div class="vedic-wisdom" id="vedicWisdom">
+        <h4>🕉️ Sacred Vidya</h4>
+        <div class="wisdom-text" id="wisdomText">
+            <div style="font-size:1.15rem;color:#FFD700;font-family:serif;margin-bottom:8px;line-height:1.4;">यथा ऊर्ध्वं तथा अधः। यथा ब्रह्माण्डे तथा पिण्डे।</div>
+            <div style="font-size:0.95rem;color:var(--text);font-style:italic;line-height:1.4;">"As above, so below. The microcosm reflects the macrocosm."</div>
+        </div>
+        <div class="wisdom-source">— Prasna Tantra</div>
+    </div>
+    
+    <h1>Prasna Chakra - 108 Kavane</h1>
+    
+    <div class="container">
+        <div class="info-panel">
+            <h3>Configuration</h3>
+            <div class="params">
+                <div class="param-item">
+                    <div class="param-label">Elements (Kavane)</div>
+                    <div class="param-value">108</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Shape</div>
+                    <div class="param-value">Irregular Hexagon</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Sides</div>
+                    <div class="param-value">[3, 2, 3, 2, 3, 2]</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Type</div>
+                    <div class="param-value">Alternating</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Grid Size</div>
+                    <div class="param-value">72×72</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Center</div>
+                    <div class="param-value">Hole (Empty)</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Beacons</div>
+                    <div class="param-value">3 × 512 bits</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Target Entropy</div>
+                    <div class="param-value">3072+ bits</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Beacon Interval</div>
+                    <div class="param-value">31-41 seconds</div>
+                </div>
+            </div>
+            <div class="beacon-info" id="beaconInfo"></div>
+            <div class="beacon-info" id="entropyInfo"></div>
+        </div>
+        
+        <canvas id="chakraCanvas" width="720" height="720"></canvas>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color hexagon kavane"></div>
+                <span>Kavane (108 Hexagons)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color hexagon hole"></div>
+                <span>4 Center Holes (No kavane)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color grid-line"></div>
+                <span>12 Bhavas (Houses)</span>
+            </div>
+            <div class="legend-item">
+                <span>Gold dot = Obverse | Red center = Reverse</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="generateBtn" onclick="generatePrasnaChakra()">
+                Generate Prasna Chakra
+            </button>
+            <button id="downloadBtn" onclick="downloadResult()" disabled>
+                Download Result
+            </button>
+        </div>
+        
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+    // ========================================
+    // PRASNA CHAKRA CONFIGURATION
+    // ========================================
+    const CONFIG = {
+        N: 108,                    // 108 kavane (elements)
+        s_grid: 72,                // 72x72 grid
+        R_grid: 8,                 // Capture radius
+        steps: 100,                // Simulation steps
+        shape: {
+            num_sides: 6,          // Hexagon (6 sides)
+            // Irregular hexagon: alternating sides of length 3 and 2
+            // sides: [3, 2, 3, 2, 3, 2] - alternating pattern
+            // For API: params has 5 values, 6th is determined geometrically
+            sides: [3, 2, 3, 2, 3, 2],
+            params: [3, 2, 3, 2, 3]  // 5 sides for API, 6th determined
+        },
+        hole: {
+            center: [36, 36],      // Center of 72x72 grid
+            radius: 8              // Hole radius (approximate cells to exclude)
+        },
+        canvas: {
+            width: 720,
+            height: 720
+        },
+        // Entropy configuration
+        entropy: {
+            beacons: 3,            // Number of beacons to fetch
+            bitsPerBlock: 512,     // 64 bytes = 512 bits per block
+            targetBits: 3072       // Target entropy (6 * 512 = 3072 bits minimum)
+        }
+    };
+
+    // API Configuration
+    const API_BASE = "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1";
+    
+    // Endpoints - the disperse function handles /disperse/beacon, /disperse/chacha20/derive, and /disperse
+    const ENDPOINTS = {
+        disperse: `${API_BASE}/disperse`,
+        beacon: `${API_BASE}/disperse/beacon`,
+        chacha20: `${API_BASE}/disperse/chacha20/derive`
+    };
+    
+    let currentResult = null;
+    let beacons = [];
+    let randomBlocks = [];
+    let skipCastingFlag = false;
+    let castingStep = 0;
+    const totalCastingSteps = 6;
+
+    // ========================================
+    // VEDIC WISDOM DATABASE - Sanskrit + Translations
+    // ========================================
+    const vedicWisdom = {
+        en: [
+            { sanskrit: "यथा ऊर्ध्वं तथा अधः। यथा ब्रह्माण्डे तथा पिण्डे।", text: "As above, so below. The microcosm reflects the macrocosm.", source: "Prasna Tantra" },
+            { sanskrit: "षट्कोणः शनेः पवित्रं रूपम्।", text: "The hexagon is the sacred geometry of Saturn, Lord of Karma.", source: "Jyotish Shastra" },
+            { sanskrit: "शून्यात् सर्वं सम्भवति।", text: "From the void, all manifestation arises.", source: "Vedanta Sutras" },
+            { sanskrit: "नवग्रहा द्वादशराशयः एकशतमष्टौ।", text: "Nine planets, twelve signs, one hundred eight combinations.", source: "Brihat Parashara Hora Shastra" },
+            { sanskrit: "ॐ इति एकाक्षरं ब्रह्म।", text: "Om is the primordial sound, the one syllable of Brahman.", source: "Mandukya Upanishad" },
+            { sanskrit: "चत्वारो वेदा दशसहस्राणि मन्त्राणि।", text: "Four Vedas, twenty thousand verses, sacred knowledge eternal.", source: "Puranic Encyclopedia" },
+            { sanskrit: "संकल्पः प्रश्नस्य मूलम्।", text: "Intention is the root of the question.", source: "Prasna Marga" },
+            { sanskrit: "सप्तविंशतिनक्षत्राणि चतुष्पदानि एकशतमष्टौ।", text: "Twenty-seven Nakshatras, four steps each, one hundred eight.", source: "Surya Siddhanta" },
+            { sanskrit: "शिवस्ताण्डवशतमष्टौ अकरोत्।", text: "Shiva performed one hundred eight cosmic dances.", source: "Natya Shastra" },
+            { sanskrit: "शरीरे एकशतमष्टौ मर्माणि।", text: "In the body, one hundred eight vital energy points.", source: "Ayurveda & Marma Shastra" },
+            { sanskrit: "कवाड्यपाते दैवी चेतना संयुज्यते।", text: "In casting shells, divine consciousness is united.", source: "Kerala Prasna Tradition" },
+            { sanskrit: "नाड्यः सप्ततिसहस्राणि जीवेश्वरयोः सन्धिः।", text: "Seventy-two thousand nadis, the bridge between soul and divine.", source: "Hatha Yoga Pradipika" },
+            { sanskrit: "द्वादशराशयो नवग्रहाश्च एकशतमष्टौ योगाः।", text: "Twelve signs and nine planets make one hundred eight combinations.", source: "Phala Deepika" },
+            { sanskrit: "श्रद्धा प्रश्नस्य कुञ्जी।", text: "Faith is the key to the question.", source: "Jaimini Sutras" },
+            { sanskrit: "पञ्चमहाभूतानि कवाड्येषु नृत्यन्ति।", text: "Five great elements dance in the shells.", source: "Samkhya Karika" }
+        ],
+        es: [
+            { sanskrit: "यथा ऊर्ध्वं तथा अधः। यथा ब्रह्माण्डे तथा पिण्डे।", text: "Como arriba, así abajo. El microcosmos refleja el macrocosmos.", source: "Prasna Tantra" },
+            { sanskrit: "षट्कोणः शनेः पवित्रं रूपम्।", text: "El hexágono es la geometría sagrada de Saturno, Señor del Karma.", source: "Jyotish Shastra" },
+            { sanskrit: "शून्यात् सर्वं सम्भवति।", text: "Del vacío, toda manifestación surge.", source: "Vedanta Sutras" },
+            { sanskrit: "नवग्रहा द्वादशराशयः एकशतमष्टौ।", text: "Nueve planetas, doce signos, ciento ocho combinaciones.", source: "Brihat Parashara Hora Shastra" },
+            { sanskrit: "ॐ इति एकाक्षरं ब्रह्म।", text: "Om es el sonido primordial, la sílaba única de Brahman.", source: "Mandukya Upanishad" },
+            { sanskrit: "चत्वारो वेदा दशसहस्राणि मन्त्राणि।", text: "Cuatro Vedas, veinte mil versos, conocimiento sagrado eterno.", source: "Puranic Encyclopedia" },
+            { sanskrit: "संकल्पः प्रश्नस्य मूलम्।", text: "La intención es la raíz de la pregunta.", source: "Prasna Marga" },
+            { sanskrit: "सप्तविंशतिनक्षत्राणि चतुष्पदानि एकशतमष्टौ।", text: "Veintisiete Nakshatras, cuatro pasos cada uno, ciento ocho.", source: "Surya Siddhanta" },
+            { sanskrit: "शिवस्ताण्डवशतमष्टौ अकरोत्।", text: "Shiva realizó ciento ocho danzas cósmicas.", source: "Natya Shastra" },
+            { sanskrit: "शरीरे एकशतमष्टौ मर्माणि।", text: "En el cuerpo, ciento ocho puntos de energía vital.", source: "Ayurveda & Marma Shastra" },
+            { sanskrit: "कवाड्यपाते दैवी चेतना संयुज्यते।", text: "Al lanzar las conchas, la conciencia divina se une.", source: "Kerala Prasna Tradition" },
+            { sanskrit: "नाड्यः सप्ततिसहस्राणि जीवेश्वरयोः सन्धिः।", text: "Setenta y dos mil nadis, el puente entre el alma y lo divino.", source: "Hatha Yoga Pradipika" },
+            { sanskrit: "द्वादशराशयो नवग्रहाश्च एकशतमष्टौ योगाः।", text: "Doce signos y nueve planetas hacen ciento ocho combinaciones.", source: "Phala Deepika" },
+            { sanskrit: "श्रद्धा प्रश्नस्य कुञ्जी।", text: "La fe es la clave de la pregunta.", source: "Jaimini Sutras" },
+            { sanskrit: "पञ्चमहाभूतानि कवाड्येषु नृत्यन्ति।", text: "Cinco grandes elementos bailan en las conchas.", source: "Samkhya Karika" }
+        ],
+        it: [
+            { sanskrit: "यथा ऊर्ध्वं तथा अधः। यथा ब्रह्माण्डे तथा पिण्डे।", text: "Come sopra, così sotto. Il microcosmo riflette il macrocosmo.", source: "Prasna Tantra" },
+            { sanskrit: "षट्कोणः शनेः पवित्रं रूपम्।", text: "L'esagono è la geometria sacra di Saturno, Signore del Karma.", source: "Jyotish Shastra" },
+            { sanskrit: "शून्यात् सर्वं सम्भवति।", text: "Dal vuoto, ogni manifestazione sorge.", source: "Vedanta Sutras" },
+            { sanskrit: "नवग्रहा द्वादशराशयः एकशतमष्टौ।", text: "Nove pianeti, dodici segni, centootto combinazioni.", source: "Brihat Parashara Hora Shastra" },
+            { sanskrit: "ॐ इति एकाक्षरं ब्रह्म।", text: "Om è il suono primordiale, l'unica sillaba di Brahman.", source: "Mandukya Upanishad" },
+            { sanskrit: "चत्वारो वेदा दशसहस्राणि मन्त्राणि।", text: "Quattro Veda, ventimila versi, conoscenza sacra eterna.", source: "Puranic Encyclopedia" },
+            { sanskrit: "संकल्पः प्रश्नस्य मूलम्।", text: "L'intenzione è la radice della domanda.", source: "Prasna Marga" },
+            { sanskrit: "सप्तविंशतिनक्षत्राणि चतुष्पदानि एकशतमष्टौ।", text: "Ventisette Nakshatra, quattro passi ciascuno, centootto.", source: "Surya Siddhanta" },
+            { sanskrit: "शिवस्ताण्डवशतमष्टौ अकरोत्।", text: "Shiva eseguì centootto danze cosmiche.", source: "Natya Shastra" },
+            { sanskrit: "शरीरे एकशतमष्टौ मर्माणि।", text: "Nel corpo, centootto punti di energia vitale.", source: "Ayurveda & Marma Shastra" },
+            { sanskrit: "कवाड्यपाते दैवी चेतना संयुज्यते।", text: "Nel lanciare le conchiglie, la coscienza divina si unisce.", source: "Kerala Prasna Tradition" },
+            { sanskrit: "नाड्यः सप्ततिसहस्राणि जीवेश्वरयोः सन्धिः।", text: "Settantaduemila nadis, il ponte tra l'anima e il divino.", source: "Hatha Yoga Pradipika" },
+            { sanskrit: "द्वादशराशयो नवग्रहाश्च एकशतमष्टौ योगाः।", text: "Dodici segni e nove pianeti formano centootto combinazioni.", source: "Phala Deepika" },
+            { sanskrit: "श्रद्धा प्रश्नस्य कुञ्जी।", text: "La fede è la chiave della domanda.", source: "Jaimini Sutras" },
+            { sanskrit: "पञ्चमहाभूतानि कवाड्येषु नृत्यन्ति।", text: "Cinque grandi elementi danzano nelle conchiglie.", source: "Samkhya Karika" }
+        ]
+    };
+
+    // ========================================
+    // CASTING ANIMATION FUNCTIONS
+    // ========================================
+    
+    function showCastingOverlay() {
+        skipCastingFlag = false;
+        castingStep = 0;
+        const overlay = document.getElementById('casting-overlay');
+        overlay.classList.add('active');
+        updateCastingProgress(0);
+        rotateVedicWisdom();
+    }
+    
+    function hideCastingOverlay() {
+        const overlay = document.getElementById('casting-overlay');
+        overlay.classList.remove('active');
+    }
+    
+    function skipCasting() {
+        skipCastingFlag = true;
+        hideCastingOverlay();
+    }
+    
+    function updateCastingProgress(percent) {
+        const progressBar = document.getElementById('castingProgress');
+        progressBar.style.width = percent + '%';
+    }
+    
+    function updateCastingStatus(stepNum, message) {
+        const statusEl = document.getElementById('castingStatus');
+        castingStep = stepNum;
+        const percent = (stepNum / totalCastingSteps) * 100;
+        updateCastingProgress(percent);
+        statusEl.innerHTML = `<span class="step-number">Step ${stepNum}/${totalCastingSteps}</span><br>${message}`;
+    }
+    
+    async function delay(ms) {
+        if (skipCastingFlag) return;
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    // Get current language from URL or default to 'en'
+    function getCurrentLang() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('lang') || localStorage.getItem('rishi_language') || 'en';
+    }
+    
+    function rotateVedicWisdom() {
+        const wisdomText = document.getElementById('wisdomText');
+        const wisdomSource = document.querySelector('.wisdom-source');
+        let index = -1; // Start at -1 so first increment shows index 0
+        let timeoutId = null;
+        
+        // Add transition for smooth fade
+        wisdomText.style.transition = 'opacity 0.5s ease';
+        
+        function showNextWisdom() {
+            const lang = getCurrentLang();
+            const quotes = vedicWisdom[lang] || vedicWisdom['en'];
+            
+            // Move to next quote
+            index = (index + 1) % quotes.length;
+            const quote = quotes[index];
+            
+            // Validate quote has all required fields
+            if (!quote || !quote.sanskrit || !quote.text) {
+                console.warn('Invalid quote at index', index, quote);
+                // Skip to next
+                timeoutId = setTimeout(showNextWisdom, 1000);
+                return;
+            }
+            
+            // Fade out
+            wisdomText.style.opacity = 0;
+            
+            setTimeout(() => {
+                // Update content with Sanskrit prominently and translation below
+                wisdomText.innerHTML = `
+                    <div class="sanskrit-text" style="font-size:1.15rem;color:#FFD700;font-family:'Noto Serif Devanagari','Sanskrit Text',serif;margin-bottom:8px;line-height:1.4;min-height:1.5em;">${quote.sanskrit}</div>
+                    <div class="translation-text" style="font-size:0.95rem;color:var(--text);font-style:italic;line-height:1.4;min-height:1.2em;">"${quote.text}"</div>
+                `;
+                wisdomSource.textContent = `— ${quote.source || 'Vedic Tradition'}`;
+                
+                // Fade in
+                wisdomText.style.opacity = 1;
+            }, 500);
+            
+            // Schedule next quote with random interval between 25-45 seconds
+            const nextInterval = Math.floor(Math.random() * 20000) + 25000; // 25000-45000ms = 25-45s
+            timeoutId = setTimeout(showNextWisdom, nextInterval);
+        }
+        
+        // Start the rotation immediately with first quote
+        showNextWisdom();
+        
+        // Return cleanup function
+        return function cleanup() {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }
+
+    // ========================================
+    // UTILITY FUNCTIONS
+    // ========================================
+    
+    // Generate 64 bytes of randomness using Crypto API
+    async function generateCryptoRandom() {
+        const array = new Uint8Array(64);
+        crypto.getRandomValues(array);
+        return Array.from(array)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+    }
+
+    // Calculate how many random blocks we need
+    function calculateRequiredRandomBlocks(numBeacons, bitsPerBlock, targetBits) {
+        const beaconBits = numBeacons * bitsPerBlock;
+        const remainingBits = Math.max(0, targetBits - beaconBits);
+        const requiredBlocks = Math.ceil(remainingBits / bitsPerBlock);
+        return Math.max(1, requiredBlocks); // At least 1 block
+    }
+
+    // Check if running from file:// protocol
+    function isFileProtocol() {
+        return window.location.protocol === 'file:';
+    }
+
+    // Fetch beacon from API with alternating sources
+    async function fetchBeacon(source = 'nist') {
+        // If running from file://, skip API calls and use crypto only
+        if (isFileProtocol()) {
+            console.log('Running from local file - using crypto randomness only');
+            // Return a placeholder that will be replaced with crypto random
+            return null;
+        }
+        
+        try {
+            const response = await fetch(`${ENDPOINTS.beacon}?source=${source}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.success && data.beacon && data.beacon.value) {
+                return data.beacon.value; // 512-bit hex string
+            }
+            throw new Error('Invalid beacon response');
+        } catch (e) {
+            console.warn(`Beacon fetch failed (${source}):`, e.message);
+            // Return null to signal fallback needed
+            return null;
+        }
+    }
+
+    // Fetch beacons with random 31-41s intervals between calls, alternating sources
+    async function fetchBeacons(count = CONFIG.entropy.beacons) {
+        if (isFileProtocol()) {
+            updateStatus('Running locally - skipping beacon fetch, using crypto randomness only...');
+            return []; // Return empty array, will use crypto only
+        }
+        
+        updateCastingStatus(2, `Fetching ${count} beacons from the cosmic source... Each beacon pulse carries the entropy of universal Shiva. Waiting 31-41 seconds between each invocation as per the sacred timing.`);
+        
+        beacons = [];
+        
+        // Helper to get random delay between 31-41 seconds
+        const getRandomDelay = () => Math.floor(Math.random() * 10000) + 31000; // 31000-41000ms
+        
+        // Helper to wait with countdown updates
+        const waitWithCountdown = (ms, nextSourceName) => {
+            return new Promise(resolve => {
+                const totalSec = Math.ceil(ms / 1000);
+                let remaining = totalSec;
+                
+                updateCastingStatus(2, `Beacon ${beacons.length} acquired ✓ Waiting ${remaining}s for next invocation from ${nextSourceName}... The sacred texts teach us that time is the breath of Brahma.`);
+                
+                const interval = setInterval(() => {
+                    remaining--;
+                    if (remaining > 0) {
+                        updateCastingStatus(2, `Beacon ${beacons.length} acquired ✓ Waiting ${remaining}s for next invocation from ${nextSourceName}... The sacred texts teach us that time is the breath of Brahma.`);
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 1000);
+                
+                setTimeout(() => {
+                    clearInterval(interval);
+                    resolve();
+                }, ms);
+            });
+        };
+        
+        for (let i = 0; i < count; i++) {
+            // Alternate between nist and curby sources
+            const source = i % 2 === 0 ? 'nist' : 'curby';
+            const sourceName = source === 'nist' ? 'NIST' : 'CURBy';
+            
+            updateCastingStatus(2, `Fetching beacon ${i + 1} of ${count} from ${sourceName}...`);
+            
+            const beacon = await fetchBeacon(source);
+            if (beacon) {
+                beacons.push(beacon);
+                // Display beacon info
+                const beaconInfo = document.getElementById('beaconInfo');
+                beaconInfo.innerHTML = beacons.map((b, idx) => 
+                    `<div class="beacon-tag">Beacon ${idx + 1}: ${b.substring(0, 16)}...</div>`
+                ).join('');
+            } else {
+                updateStatus(`Beacon ${i + 1} failed - will compensate with crypto randomness`);
+            }
+            
+            // Wait random 31-41 seconds before fetching next beacon (except after the last one)
+            if (i < count - 1) {
+                const nextSource = (i + 1) % 2 === 0 ? 'NIST' : 'CURBy';
+                const delayMs = getRandomDelay();
+                await waitWithCountdown(delayMs, nextSource);
+                if (skipCastingFlag) return beacons; // User skipped
+            }
+        }
+        
+        // Display final beacon info
+        const beaconInfo = document.getElementById('beaconInfo');
+        if (beacons.length > 0) {
+            updateStatus(`${beacons.length} beacons acquired ✓`);
+        } else {
+            beaconInfo.innerHTML = '<div class="beacon-tag">Using crypto randomness only</div>';
+        }
+        
+        return beacons;
+    }
+
+    // Generate random blocks dynamically based on required entropy
+    async function generateRandomBlocks(requiredBlocks) {
+        updateStatus(`Generating ${requiredBlocks} crypto random blocks (${requiredBlocks * 512} bits)...`);
+        const blocks = [];
+        for (let i = 0; i < requiredBlocks; i++) {
+            const block = await generateCryptoRandom(); // 64 bytes = 512 bits
+            blocks.push(block);
+        }
+        updateStatus(`${requiredBlocks} crypto random blocks generated ✓`);
+        return blocks;
+    }
+
+    // Combine beacons and random blocks into seed
+    async function generateSeed() {
+        // Step 1: Fetch beacons first to see how many we got
+        const beaconList = await fetchBeacons(CONFIG.entropy.beacons);
+        
+        // Step 2: Calculate how many random blocks we need
+        // If running from file:// or all beacons failed, we need more crypto blocks
+        const targetBeacons = CONFIG.entropy.beacons;
+        const actualBeacons = beaconList.length;
+        const beaconShortfall = targetBeacons - actualBeacons;
+        
+        const baseRandomBlocks = calculateRequiredRandomBlocks(
+            actualBeacons,
+            CONFIG.entropy.bitsPerBlock,
+            CONFIG.entropy.targetBits
+        );
+        
+        // Add extra random blocks to compensate for missing beacons
+        const requiredRandomBlocks = baseRandomBlocks + beaconShortfall;
+        
+        if (isFileProtocol()) {
+            updateCastingStatus(2, `Running from local file - generating ${requiredRandomBlocks} blocks of pure crypto randomness from your browser's CSPRNG. The divine randomness emerges from the quantum foam of your device...`);
+        } else if (beaconShortfall > 0) {
+            updateCastingStatus(2, `${beaconShortfall} beacon(s) unavailable - generating ${requiredRandomBlocks} crypto blocks to maintain ${CONFIG.entropy.targetBits} bits of entropy...`);
+        }
+        
+        // Step 3: Generate random blocks
+        const randomBlockList = await generateRandomBlocks(requiredRandomBlocks);
+        
+        // Step 4: Combine with alternating pattern: beacon, random, beacon, random...
+        // This ensures good mixing of external and local entropy
+        let combined = '';
+        const maxPairs = Math.max(beaconList.length, randomBlockList.length);
+        
+        for (let i = 0; i < maxPairs; i++) {
+            if (i < beaconList.length) {
+                combined += beaconList[i];
+            }
+            if (i < randomBlockList.length) {
+                combined += randomBlockList[i];
+            }
+        }
+        
+        // Display entropy info
+        const entropyInfo = document.getElementById('entropyInfo');
+        const totalBits = combined.length * 4;
+        const sourceText = isFileProtocol() ? 'Crypto only' : 
+                          (beaconShortfall > 0 ? `${actualBeacons} beacons + crypto` : 'Beacons + crypto');
+        entropyInfo.innerHTML = `
+            <div class="beacon-tag">Source: ${sourceText}</div>
+            <div class="beacon-tag">Total: ${totalBits} bits</div>
+        `;
+        
+        updateStatus(`Master seed created: ${totalBits} bits of entropy ✓`);
+        return combined;
+    }
+
+    // Calculate hexagon vertices
+    function calculateHexagonVertices(cx, cy, sideLength, cornerLength) {
+        const vertices = [];
+        // For a hexagon with flat top
+        // side_length affects the main sides, corner_length affects the corner vertices
+        const r = (sideLength + cornerLength) * 2; // Approximate radius
+        
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i; // 60 degrees per vertex
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            vertices.push([x, y]);
+        }
+        return vertices;
+    }
+
+    // Create 16-cell grid (4x4 layout)
+    // Center 4 cells are holes - creates a hole in the middle
+    function createGridConstraints() {
+        // For a 72x72 grid, create 16 cells (4x4):
+        // 3 vertical lines at 18, 36, 54 divide into 4 columns
+        // 3 horizontal lines at 18, 36, 54 divide into 4 rows
+        // Total: 4 x 4 = 16 cells
+        
+        const v_lines = [18, 36, 54];
+        const h_lines = [18, 36, 54];
+        
+        // Cell indices (row, col) - row-major order:
+        // Row 0: (0,0)=0  (0,1)=1  (0,2)=2  (0,3)=3
+        // Row 1: (1,0)=4  (1,1)=5  (1,2)=6  (1,3)=7
+        // Row 2: (2,0)=8  (2,1)=9  (2,2)=10 (2,3)=11
+        // Row 3: (3,0)=12 (3,1)=13 (3,2)=14 (3,3)=15
+        
+        // Center 4 cells (indices 5, 6, 9, 10) are holes:
+        // Cell 5: row 1, col 1
+        // Cell 6: row 1, col 2
+        // Cell 9: row 2, col 1
+        // Cell 10: row 2, col 2
+        
+        const holes = [
+            [1, 1],  // Cell 5
+            [1, 2],  // Cell 6
+            [2, 1],  // Cell 9
+            [2, 2]   // Cell 10
+        ];
+        
+        return { v_lines, h_lines, holes };
+    }
+
+    // ========================================
+    // API CALL
+    // ========================================
+    
+    async function callDisperseAPI(seed) {
+        updateStatus('Calling disperse API...');
+        
+        // Irregular hexagon: alternating sides of length 3 and 2
+        const shape_params = CONFIG.shape.params; // [3, 2, 3, 2, 3]
+        
+        // Create 16-cell grid (4x4) with 4 center holes
+        const { v_lines, h_lines, holes } = createGridConstraints();
+        console.log(`Grid: ${v_lines.length} v-lines, ${h_lines.length} h-lines, ${holes.length} holes`);
+        
+        const requestBody = {
+            N: CONFIG.N,
+            steps: CONFIG.steps,
+            R_grid: CONFIG.R_grid,
+            s_grid: CONFIG.s_grid,
+            num_sides: 6,              // Hexagon (6 sides)
+            shape_params: shape_params, // [3, 2, 3, 2, 3] - alternating sides
+            num_rotations: 6,          // 6 rotation positions for hexagon
+            enable_mirror: true,       // Allow mirror for variety
+            v_lines: v_lines,          // Vertical lines for 4x4 grid
+            h_lines: h_lines,          // Horizontal lines for 4x4 grid
+            holes: holes,              // Holes in 4 center cells
+            seed: seed                 // Combined seed from beacons + crypto
+        };
+        
+        console.log('Request body:', JSON.stringify(requestBody, null, 2));
+        
+        const response = await fetch(ENDPOINTS.disperse, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('API Response:', data);
+        
+        if (data.parameters) {
+            console.log('Holes in response:', data.parameters.holes ? data.parameters.holes.length : 0);
+        }
+        
+        updateStatus('API response received ✓');
+        return data;
+    }
+
+    // ========================================
+    // CANVAS DRAWING
+    // ========================================
+    
+    function normalizeAndProject(points) {
+        // Normalize points from 0-72 grid to canvas coordinates
+        const scaleX = CONFIG.canvas.width / CONFIG.s_grid;
+        const scaleY = CONFIG.canvas.height / CONFIG.s_grid;
+        
+        return points.map(p => ({
+            x: p.x * scaleX,
+            y: p.y * scaleY,
+            id: p.id
+        }));
+    }
+
+    function drawHexagon(ctx, cx, cy, sideLength, rotationAngle = 0, isMirrored = false, fillStyle = '#e4c44a', strokeStyle = '#ffe066') {
+        const size = (sideLength + 2) * 3; // Scale factor for visibility
+        
+        ctx.save();
+        ctx.translate(cx, cy);
+        
+        // Apply rotation
+        ctx.rotate((rotationAngle * Math.PI) / 180);
+        
+        // Apply mirror if needed (flip horizontally)
+        if (isMirrored) {
+            ctx.scale(-1, 1);
+        }
+        
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 6; // Start from top
+            const x = size * Math.cos(angle);
+            const y = size * Math.sin(angle);
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.closePath();
+        
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw a small indicator for mirror state (obverse/reverse)
+        if (isMirrored) {
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'; // Red tint for mirrored
+            ctx.fill();
+        }
+        
+        ctx.restore();
+    }
+
+    function drawHole(ctx, cx, cy, radius) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#0d0805';
+        ctx.fill();
+        ctx.strokeStyle = '#a0522d';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    function drawGrid(ctx) {
+        ctx.strokeStyle = 'rgba(228, 196, 74, 0.1)';
+        ctx.lineWidth = 1;
+        
+        const step = CONFIG.canvas.width / CONFIG.s_grid;
+        
+        for (let i = 0; i <= CONFIG.s_grid; i++) {
+            const pos = i * step;
+            
+            // Vertical lines
+            ctx.beginPath();
+            ctx.moveTo(pos, 0);
+            ctx.lineTo(pos, CONFIG.canvas.height);
+            ctx.stroke();
+            
+            // Horizontal lines
+            ctx.beginPath();
+            ctx.moveTo(0, pos);
+            ctx.lineTo(CONFIG.canvas.width, pos);
+            ctx.stroke();
+        }
+    }
+
+    function drawChakra(result) {
+        const canvas = document.getElementById('chakraCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Get parameters from result
+        const params = result.parameters || {};
+        const v_lines = params.v_lines || [];
+        const h_lines = params.h_lines || [];
+        const holes = params.holes || [];
+        
+        // Clear canvas
+        ctx.fillStyle = '#050505';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw faint background grid
+        drawGrid(ctx);
+        
+        // Draw the actual grid lines from API
+        const scaleX = canvas.width / CONFIG.s_grid;
+        const scaleY = canvas.height / CONFIG.s_grid;
+        
+        // Draw vertical grid lines (prominent)
+        ctx.strokeStyle = 'rgba(228, 196, 74, 0.5)';
+        ctx.lineWidth = 2;
+        v_lines.forEach(v => {
+            const x = v * scaleX;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+        });
+        
+        // Draw horizontal grid lines (prominent)
+        h_lines.forEach(h => {
+            const y = h * scaleY;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        });
+        
+        // Draw hole cells (shaded)
+        ctx.fillStyle = 'rgba(90, 8, 8, 0.4)';
+        holes.forEach(([row, col]) => {
+            // Calculate cell boundaries based on grid lines
+            const x1 = (col === 0 ? 0 : v_lines[col - 1] || 0) * scaleX;
+            const x2 = (col < v_lines.length ? v_lines[col] : CONFIG.s_grid) * scaleX;
+            const y1 = (row === 0 ? 0 : h_lines[row - 1] || 0) * scaleY;
+            const y2 = (row < h_lines.length ? h_lines[row] : CONFIG.s_grid) * scaleY;
+            
+            ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+        });
+        
+        // Calculate center for marker
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Normalize and project points
+        const projectedPoints = normalizeAndProject(result.results.points);
+        
+        // Get orientation history if available
+        const orientationHistory = result.results.orientation_history_sample || [];
+        
+        // Draw each kavane (hexagon) with rotation and mirror
+        projectedPoints.forEach((point, index) => {
+            // Get orientation for this point (cycle through available orientations)
+            const orientation = orientationHistory[index % orientationHistory.length] || {};
+            const rotationAngle = orientation.rotation_angle || 0;
+            const isMirrored = orientation.mirror || false;
+            
+            // Vary color based on rotation for visual interest
+            // Different rotation = different hue
+            const baseHue = 45; // Gold base
+            const hueShift = (rotationAngle / 180) * 30; // Shift up to 30 degrees based on rotation
+            const hue = baseHue + hueShift;
+            
+            const fillStyle = `hsl(${hue}, 70%, ${isMirrored ? '40%' : '50%'})`;
+            const strokeStyle = `hsl(${hue}, 90%, 70%)`;
+            
+            drawHexagon(
+                ctx, 
+                point.x, 
+                point.y, 
+                CONFIG.shape.side_length,
+                rotationAngle,
+                isMirrored,
+                fillStyle,
+                strokeStyle
+            );
+            
+            // Draw mirror indicator (dot in center for obverse/reverse)
+            if (isMirrored) {
+                // Mirrored = Reverse (red dot)
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Normal = Obverse (gold dot)
+                ctx.fillStyle = '#e4c44a';
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Draw index number for first few elements
+            if (index < 12) {
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 10px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText((index + 1).toString(), point.x, point.y);
+            }
+        });
+        
+        // Draw center marker
+        ctx.fillStyle = '#e4c44a';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw statistics
+        ctx.fillStyle = '#f8f4ed';
+        ctx.font = '12px serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`Total Kavane: ${result.results.total_points}`, 10, 20);
+        ctx.fillText(`Seed Source: ${result.parameters.seed_source}`, 10, 35);
+        ctx.fillText(`Grid: ${CONFIG.s_grid}×${CONFIG.s_grid}`, 10, 50);
+        ctx.fillText(`Center Hole Radius: ${CONFIG.hole.radius}`, 10, 65);
+        
+        // Draw legend for obverse/reverse
+        ctx.fillStyle = '#e4c44a';
+        ctx.beginPath();
+        ctx.arc(20, 85, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f8f4ed';
+        ctx.font = '10px serif';
+        ctx.fillText('= Obverse (Normal)', 30, 88);
+        
+        ctx.fillStyle = '#ff4444';
+        ctx.beginPath();
+        ctx.arc(20, 100, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f8f4ed';
+        ctx.fillText('= Reverse (Mirrored)', 30, 103);
+        
+        // Show orientation entropy bits
+        if (result.results.orientation_entropy_bits) {
+            ctx.fillStyle = '#f8f4ed';
+            ctx.fillText(`Orientation Entropy: ${result.results.orientation_entropy_bits} bits`, 10, 120);
+        }
+    }
+
+    // ========================================
+    // MAIN FUNCTIONS
+    // ========================================
+    
+    function updateStatus(msg) {
+        document.getElementById('status').textContent = msg;
+        console.log(msg);
+    }
+
+    async function generatePrasnaChakra() {
+        const btn = document.getElementById('generateBtn');
+        btn.disabled = true;
+        
+        // Show casting overlay with animations
+        showCastingOverlay();
+        
+        try {
+            // Step 1: Invoke the sacred space
+            updateCastingStatus(1, "Invoking the sacred space... Aligning with the cosmic energies of the Navagraha (nine planets). The sacred teachings remind us that all manifestation arises from the union of Purusha and Prakriti.");
+            await delay(2500);
+            if (skipCastingFlag) return;
+            
+            // Step 2: Fetch beacons from the cosmic source
+            updateCastingStatus(2, "Fetching cosmic entropy... Beacon 1/3 from NIST (next: CURBy in ~35s). These pulses carry the entropy of universal Shiva, the divine randomness that underlies all cosmic order.");
+            const seed = await generateSeed();
+            await delay(1500);
+            if (skipCastingFlag) return;
+            
+            // Step 3: Call the disperse API - the heart of Prasna
+            updateCastingStatus(3, "Casting the 108 kavane across the sacred grid... Each kavane represents one of the 108 energy channels (Nadis) of the cosmic body. The hexagon's alternating sides (3, 2, 3, 2, 3, 2) embody the eternal dance of expansion and contraction, like the breath of Brahma.");
+            const result = await callDisperseAPI(seed);
+            
+            if (!result.success) {
+                throw new Error(result.error || 'API call failed');
+            }
+            
+            currentResult = result;
+            await delay(1500);
+            if (skipCastingFlag) return;
+            
+            // Step 4: Project to canvas - manifestation
+            updateCastingStatus(4, "Projecting the cosmic distribution onto the Prasna Chakra... The 72×72 grid represents the 72,000 Nadis of the subtle body. The central void (Shunya) is the birthplace of all creation, where the 108 energies emerge from the unmanifest.");
+            await delay(2000);
+            if (skipCastingFlag) return;
+            
+            // Step 5: Draw the sacred geometry
+            updateCastingStatus(5, "Drawing the sacred geometry... Each hexagonal kavane carries the vibration of a specific cosmic energy. The irregular hexagon reminds us: 'This world is not perfect, yet it is perfectly arranged for the soul's evolution.' — Bhagavad Gita");
+            drawChakra(result);
+            await delay(1500);
+            if (skipCastingFlag) return;
+            
+            // Step 6: Completion - blessing
+            updateCastingStatus(6, "The Prasna Chakra is complete. May the wisdom of the 108 kavane guide your path. As the Prashna Upanishad declares: 'He who knows the nature of the universe knows the Self. He who knows the Self knows the universe.' ॐ शान्तिः शान्तिः शान्तिः ॥");
+            await delay(2500);
+            
+            document.getElementById('downloadBtn').disabled = false;
+            updateStatus('Prasna Chakra generated successfully! ✓');
+            
+        } catch (error) {
+            console.error('Error:', error);
+            updateStatus(`Error: ${error.message}`);
+        } finally {
+            hideCastingOverlay();
+            btn.disabled = false;
+        }
+    }
+
+    function downloadResult() {
+        if (!currentResult) return;
+        
+        const canvas = document.getElementById('chakraCanvas');
+        const link = document.createElement('a');
+        link.download = `prasna-chakra-${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    
+    // Start Vedic wisdom rotation immediately on page load
+    window.addEventListener('load', () => {
+        // Check if running from file:// and show warning
+        if (isFileProtocol()) {
+            updateStatus('⚠️ Running from local file. Beacons unavailable - will use browser crypto randomness only. For full functionality, serve this file via HTTPS.');
+            
+            // Update entropy info to show file:// mode
+            const beaconInfo = document.getElementById('beaconInfo');
+            beaconInfo.innerHTML = '<div class="beacon-tag" style="border-color:#ff6b6b; color:#ff6b6b;">⚠️ File:// mode - Crypto only</div>';
+        } else {
+            updateStatus('Ready. Click "Generate" to create Prasna Chakra.');
+        }
+        
+        // Start rotating Vedic wisdom immediately
+        rotateVedicWisdom();
+        
+        // Optional: Pre-fetch beacons in background for faster casting
+        // fetchThreeBeacons();
+    });
+    </script>
+</body>
+</html>
