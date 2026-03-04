@@ -4,9 +4,10 @@ window.APP_CONFIG = {
   // Shared Services (cross-project)
   SHARED_SERVICES: {
     rng: "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-rng",
-    translate: "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-translate",
+    translate: "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/yijingtu-translate",
     export: "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-export",
-    cache: "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-cache"
+    cache: "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-cache",
+    rag: "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-rag"
   },
   
   ENDPOINTS: {
