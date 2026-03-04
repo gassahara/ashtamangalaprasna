@@ -7689,26 +7689,64 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
             // Start rotating Vedic messages during beacon fetch
             startVedicMessages();
 
-            const beaconList = await fetchBeaconsKavana(KAVANA_CONFIG.entropy.beacons);
-            const requiredBlocks = Math.max(3, 6 - beaconList.length);
+            // Use shared-rng service for superior entropy mixing
+            const sharedRngUrl = window.APP_CONFIG?.SHARED_SERVICES?.rng || 'https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-rng';
+            
+            try {
+                updateStatusOverlay('Invoking the cosmic entropy... Fetching from shared universal randomness source');
+                
+                const response = await fetch(`${sharedRngUrl}?bits=3072&format=hex&sources=NIST,drand,local`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
 
-            const blocks = [];
-            for (let i = 0; i < requiredBlocks; i++) {
-                blocks.push(await generateCryptoRandomKavana());
+                if (!response.ok) {
+                    throw new Error(`shared-rng returned ${response.status}`);
+                }
+
+                const rngData = await response.json();
+                
+                if (!rngData.success || !rngData.data?.entropy) {
+                    throw new Error('Invalid response from shared-rng');
+                }
+
+                const combined = rngData.data.entropy;
+                const sources = rngData.data.sources || ['local_crypto'];
+                const qualityScore = rngData.data.quality_score || 0;
+                const totalBits = combined.length * 4;
+
+                document.getElementById('entropyInfo-chakra').innerHTML = `
+                    <div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem;">Source: ${sources.join(' + ')}</div>
+                    <div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem;">Total: ${totalBits} bits (quality: ${(qualityScore * 100).toFixed(0)}%)</div>
+                `;
+                
+                return combined;
+                
+            } catch (error) {
+                console.warn('[shared-rng] Failed, falling back to legacy beacon fetching:', error.message);
+                
+                // Legacy fallback: original implementation
+                const beaconList = await fetchBeaconsKavana(KAVANA_CONFIG.entropy.beacons);
+                const requiredBlocks = Math.max(3, 6 - beaconList.length);
+
+                const blocks = [];
+                for (let i = 0; i < requiredBlocks; i++) {
+                    blocks.push(await generateCryptoRandomKavana());
+                }
+
+                let combined = '';
+                for (let i = 0; i < Math.max(beaconList.length, blocks.length); i++) {
+                    if (i < beaconList.length) combined += beaconList[i];
+                    if (i < blocks.length) combined += blocks[i];
+                }
+
+                const totalBits = combined.length * 4;
+                document.getElementById('entropyInfo-chakra').innerHTML = `
+                    <div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem;">Source: ${beaconList.length > 0 ? beaconList.length + ' beacons + crypto' : 'Crypto only'} (legacy)</div>
+                    <div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem;">Total: ${totalBits} bits</div>
+                `;
+                return combined;
             }
-
-            let combined = '';
-            for (let i = 0; i < Math.max(beaconList.length, blocks.length); i++) {
-                if (i < beaconList.length) combined += beaconList[i];
-                if (i < blocks.length) combined += blocks[i];
-            }
-
-            const totalBits = combined.length * 4;
-            document.getElementById('entropyInfo-chakra').innerHTML = `
-                <div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem;">Source: ${beaconList.length > 0 ? beaconList.length + ' beacons + crypto' : 'Crypto only'}</div>
-                <div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem;">Total: ${totalBits} bits</div>
-            `;
-            return combined;
         }
 
         function createGridConstraintsKavana() {
@@ -7918,15 +7956,41 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
 
         // Fetch fresh beacon from NIST
         async function fetchFreshBeacon() {
+            // Use shared-rng service for superior entropy
+            const sharedRngUrl = window.APP_CONFIG?.SHARED_SERVICES?.rng || 'https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-rng';
+            
             try {
-                const nist = await fetch("https://beacon.nist.gov/beacon/2.0/pulse/last").then(r => r.json());
-                return nist.pulse.outputValue; // 512-bit hex string
-            } catch (e) {
-                console.warn('Failed to fetch beacon, using local entropy:', e.message);
-                // Fallback: generate local entropy
-                const buffer = new Uint8Array(64);
-                crypto.getRandomValues(buffer);
-                return Array.from(buffer).map(b => b.toString(16).padStart(2, '0')).join('');
+                const response = await fetch(`${sharedRngUrl}?bits=512&format=hex`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`shared-rng returned ${response.status}`);
+                }
+
+                const rngData = await response.json();
+                
+                if (!rngData.success || !rngData.data?.entropy) {
+                    throw new Error('Invalid response from shared-rng');
+                }
+
+                return rngData.data.entropy; // 512-bit hex string (128 hex chars)
+                
+            } catch (error) {
+                console.warn('[shared-rng] Failed, falling back to direct NIST:', error.message);
+                
+                // Legacy fallback: direct NIST fetch
+                try {
+                    const nist = await fetch("https://beacon.nist.gov/beacon/2.0/pulse/last").then(r => r.json());
+                    return nist.pulse.outputValue; // 512-bit hex string
+                } catch (e) {
+                    console.warn('Failed to fetch beacon, using local entropy:', e.message);
+                    // Fallback: generate local entropy
+                    const buffer = new Uint8Array(64);
+                    crypto.getRandomValues(buffer);
+                    return Array.from(buffer).map(b => b.toString(16).padStart(2, '0')).join('');
+                }
             }
         }
 
