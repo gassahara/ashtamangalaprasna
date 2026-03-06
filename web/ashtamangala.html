@@ -6713,7 +6713,7 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
                 // ========================================
                 // STEP 1: Cast the 108 Kavane (Prasna Chakra)
                 // ========================================
-                updateStatusOverlay('Invoking the cosmic entropy... Fetching beacon pulses from NIST and CURBy');
+                updateStatusOverlay('Invoking the cosmic entropy... First meditation (45-68s), then 2 beacons from NIST and CURBy');
                 const kavanaSeed = await generateSeedKavana();
 
                 updateStatusOverlay('Casting the 108 kavane across the sacred grid...');
@@ -7451,7 +7451,7 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
             },
             hole: { center: [36, 36], radius: 8 },
             canvas: { width: 720, height: 720 },
-            entropy: { beacons: 3, bitsPerBlock: 512, targetBits: 3072 }
+            entropy: { beacons: 4, bitsPerBlock: 512, targetBits: 2048 }
         };
 
         let kavanaResult = null;
@@ -7588,22 +7588,24 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
             return window.location.protocol === 'file:';
         }
 
-        async function fetchBeaconKavana(source = 'nist') {
+        async function fetchBeaconKavana(source = 'NIST') {
             if (isFileProtocolKavana()) return null;
             try {
-                const disperseBase = window.APP_CONFIG?.ENDPOINTS?.disperse || 'https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/disperse';
-                const response = await fetch(`${disperseBase}/beacon?source=${source}`);
+                // Use shared-rng service with specific source (NIST or CURBy)
+                const rngBase = window.APP_CONFIG?.SHARED_SERVICES?.rng || 'https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-rng';
+                const response = await fetch(`${rngBase}?bits=512&format=hex&sources=${source}`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-                if (data.success && data.beacon?.value) return data.beacon.value;
-                throw new Error('Invalid beacon response');
+                const result = await response.json();
+                // shared-rng returns: { success: true, data: { entropy, format, bits, sources, ... } }
+                if (result.success && result.data?.entropy) return result.data.entropy;
+                throw new Error('Invalid RNG response');
             } catch (e) {
-                console.warn(`Beacon fetch failed (${source}):`, e.message);
+                console.warn(`RNG fetch failed (${source}):`, e.message);
                 return null;
             }
         }
 
-        async function fetchBeaconsKavana(count = 3) {
+        async function fetchBeaconsKavana(count = 4) {
             if (isFileProtocolKavana()) {
                 updateKavanaDebug('Running locally - using crypto randomness');
                 return [];
@@ -7614,33 +7616,44 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
             // Start rotating Vedic messages (independent of status)
             startVedicMessages();
 
-            // Helper to get random delay between 31-41 seconds
-            const getRandomDelay = () => Math.floor(Math.random() * 10000) + 31000; // 31000-41000ms
+            // Helper to get secure random integer
+            const getSecureRandomInt = (min, max) => {
+                const range = max - min + 1;
+                const array = new Uint32Array(1);
+                crypto.getRandomValues(array);
+                const maxValid = Math.floor(0x100000000 / range) * range;
+                let randomValue = array[0];
+                while (randomValue >= maxValid) {
+                    crypto.getRandomValues(array);
+                    randomValue = array[0];
+                }
+                return min + (randomValue % range);
+            };
 
             // Helper to wait with countdown updates
-            const waitWithCountdown = (ms, currentBeaconNum, nextSourceName) => {
+            const waitWithCountdown = (ms, waveNum) => {
                 return new Promise(resolve => {
                     const totalSec = Math.ceil(ms / 1000);
                     let remaining = totalSec;
 
                     // Status circle shows waiting state
-                    updateStatusCircle('Waiting for next beacon', nextSourceName, currentBeaconNum);
+                    updateStatusCircle('Meditation', `Wave ${waveNum}`, waveNum);
                     // Debug shows countdown
-                    updateKavanaDebug(`[${remaining}s] Next: ${nextSourceName} | Timer: ${remaining} seconds`);
+                    updateKavanaDebug(`[Wave ${waveNum}] Meditation: ${remaining}s`);
                     // Main status overlay shows user-friendly message with countdown
-                    updateStatusOverlay(`Receiving cosmic entropy... ${remaining}s until next beacon from ${nextSourceName}`);
+                    updateStatusOverlay(`Wave ${waveNum} meditation... ${remaining}s remaining`);
 
                     const interval = setInterval(() => {
                         remaining--;
                         if (remaining > 0) {
                             // Debug updates with countdown (independent of Vedic message)
-                            updateKavanaDebug(`[${remaining}s] Next: ${nextSourceName} | Timer: ${remaining} seconds`);
+                            updateKavanaDebug(`[Wave ${waveNum}] Meditation: ${remaining}s`);
                             // Update main status with countdown
-                            updateStatusOverlay(`Receiving cosmic entropy... ${remaining}s until next beacon from ${nextSourceName}`);
+                            updateStatusOverlay(`Wave ${waveNum} meditation... ${remaining}s remaining`);
                         } else {
                             clearInterval(interval);
-                            updateKavanaDebug(`[0s] Fetching from ${nextSourceName}...`);
-                            updateStatusOverlay(`Fetching beacon pulse from ${nextSourceName}...`);
+                            updateKavanaDebug(`[Wave ${waveNum}] Meditation complete. Fetching beacons...`);
+                            updateStatusOverlay(`Wave ${waveNum}: Fetching cosmic entropy...`);
                         }
                     }, 1000);
 
@@ -7651,38 +7664,76 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
                 });
             };
 
-            for (let i = 0; i < count; i++) {
-                // Alternate between nist and curby sources
-                const source = i % 2 === 0 ? 'nist' : 'curby';
-                const sourceName = source === 'nist' ? 'NIST' : 'CURBy';
-
-                // Status circle shows fetching
-                updateStatusCircle('Fetching Beacon', sourceName, i + 1);
-                // Debug shows technical details
-                updateKavanaDebug(`[FETCHING] Beacon ${i + 1}/${count} from ${sourceName}...`);
-                // Main status shows user-friendly message
-                updateStatusOverlay(`Gathering cosmic entropy... Beacon ${i + 1}/${count} from ${sourceName}`);
-
-                const beacon = await fetchBeaconKavana(source);
-                if (beacon) {
-                    kavanaBeacons.push(beacon);
-                    document.getElementById('beaconInfo-chakra').innerHTML = kavanaBeacons.map((b, idx) =>
-                        `<div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; font-family: monospace;">Beacon ${idx + 1}: ${b.substring(0, 16)}...</div>`
-                    ).join('');
-                }
-                if (i < count - 1) {
-                    const nextSource = (i + 1) % 2 === 0 ? 'NIST' : 'CURBy';
-                    const delayMs = getRandomDelay();
-                    await waitWithCountdown(delayMs, i + 1, nextSource);
-                }
-                if (skipKavanaFlag) {
-                    stopVedicMessages();
-                    return kavanaBeacons;
-                }
+            // === FIRST WAVE ===
+            // First meditation: 45-68 seconds
+            const firstWaitMs = getSecureRandomInt(45000, 68000);
+            updateKavanaDebug(`[INIT] First meditation: ${Math.round(firstWaitMs/1000)}s`);
+            updateStatusOverlay(`First meditation: ${Math.round(firstWaitMs/1000)} seconds...`);
+            await waitWithCountdown(firstWaitMs, 1);
+            
+            if (skipKavanaFlag) {
+                stopVedicMessages();
+                return kavanaBeacons;
             }
+
+            // Fetch first 2 beacons (NIST + CURBy)
+            updateStatusCircle('Fetching', 'Wave 1', 1);
+            updateKavanaDebug('[Wave 1] Fetching 2 beacons (NIST + CURBy)...');
+            updateStatusOverlay('Wave 1: Gathering cosmic entropy from NIST and CURBy...');
+            
+            const firstWave = await fetchBeaconWaveKavana(2);
+            kavanaBeacons.push(...firstWave);
+            document.getElementById('beaconInfo-chakra').innerHTML = kavanaBeacons.map((b, idx) =>
+                `<div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; font-family: monospace;">Beacon ${idx + 1}: ${b.substring(0, 16)}...</div>`
+            ).join('');
+            
+            updateKavanaDebug(`[Wave 1] Complete: ${firstWave.length} beacons (${firstWave.length * 512} bits)`);
+
+            // === SECOND WAVE ===
+            // Second meditation: 63-71 seconds
+            const secondWaitMs = getSecureRandomInt(63000, 71000);
+            updateKavanaDebug(`[INIT] Second meditation: ${Math.round(secondWaitMs/1000)}s`);
+            updateStatusOverlay(`Second meditation: ${Math.round(secondWaitMs/1000)} seconds...`);
+            await waitWithCountdown(secondWaitMs, 2);
+            
+            if (skipKavanaFlag) {
+                stopVedicMessages();
+                return kavanaBeacons;
+            }
+
+            // Fetch second 2 beacons
+            updateStatusCircle('Fetching', 'Wave 2', 2);
+            updateKavanaDebug('[Wave 2] Fetching 2 beacons (NIST + CURBy)...');
+            updateStatusOverlay('Wave 2: Gathering cosmic entropy from NIST and CURBy...');
+            
+            const secondWave = await fetchBeaconWaveKavana(2);
+            kavanaBeacons.push(...secondWave);
+            document.getElementById('beaconInfo-chakra').innerHTML = kavanaBeacons.map((b, idx) =>
+                `<div style="background: rgba(214, 148, 73, 0.15); border: 1px solid var(--temple-gold); padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; font-family: monospace;">Beacon ${idx + 1}: ${b.substring(0, 16)}...</div>`
+            ).join('');
+            
+            updateKavanaDebug(`[Wave 2] Complete: ${secondWave.length} beacons. Total: ${kavanaBeacons.length} beacons (${kavanaBeacons.length * 512} bits)`);
 
             stopVedicMessages();
             return kavanaBeacons;
+        }
+
+        // Fetch a wave of beacons (multiple sources sequentially within the wave)
+        async function fetchBeaconWaveKavana(waveCount) {
+            const waveBeacons = [];
+            
+            // For each beacon in the wave, alternate between NIST and CURBy
+            for (let i = 0; i < waveCount; i++) {
+                const source = i % 2 === 0 ? 'NIST' : 'CURBy';
+                const beacon = await fetchBeaconKavana(source);
+                if (beacon) {
+                    waveBeacons.push(beacon);
+                } else {
+                    updateKavanaDebug(`[FETCH FAILED] ${source} beacon failed`);
+                }
+            }
+            
+            return waveBeacons;
         }
 
         async function generateSeedKavana() {
@@ -7695,7 +7746,7 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
             try {
                 updateStatusOverlay('Invoking the cosmic entropy... Fetching from shared universal randomness source');
                 
-                const response = await fetch(`${sharedRngUrl}?bits=3072&format=hex&sources=NIST,drand,local`, {
+                const response = await fetch(`${sharedRngUrl}?bits=3072&format=hex&sources=NIST,CURBy,local`, {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 });
@@ -7954,7 +8005,7 @@ Weak Houses: ${tech?.weak?.join(', ') || 'N/A'}
             return calculateAllPlanets(jd);
         }
 
-        // Fetch fresh beacon from NIST
+        // Fetch fresh entropy from shared-rng service
         async function fetchFreshBeacon() {
             // Use shared-rng service for superior entropy
             const sharedRngUrl = window.APP_CONFIG?.SHARED_SERVICES?.rng || 'https://vflkhntzwfovnuyccxow.supabase.co/functions/v1/shared-rng';

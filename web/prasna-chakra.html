@@ -535,19 +535,20 @@
         },
         // Entropy configuration
         entropy: {
-            beacons: 3,            // Number of beacons to fetch
+            beacons: 4,            // Number of beacons to fetch (2 waves × 2 beacons)
             bitsPerBlock: 512,     // 64 bytes = 512 bits per block
-            targetBits: 3072       // Target entropy (6 * 512 = 3072 bits minimum)
+            targetBits: 2048       // Target entropy (4 * 512 = 2048 bits from beacons)
         }
     };
 
     // API Configuration
     const API_BASE = "https://vflkhntzwfovnuyccxow.supabase.co/functions/v1";
     
-    // Endpoints - the disperse function handles /disperse/beacon, /disperse/chacha20/derive, and /disperse
+    // Endpoints - the disperse function handles /disperse
+    // Note: Beacon endpoint now uses shared-rng for superior multi-source entropy
     const ENDPOINTS = {
         disperse: `${API_BASE}/disperse`,
-        beacon: `${API_BASE}/disperse/beacon`,
+        beacon: `${API_BASE.replace('/disperse', '')}/shared-rng`,
         chacha20: `${API_BASE}/disperse/chacha20/derive`
     };
     
@@ -742,8 +743,8 @@
         return window.location.protocol === 'file:';
     }
 
-    // Fetch beacon from API with alternating sources
-    async function fetchBeacon(source = 'nist') {
+    // Fetch entropy from shared-rng service (NIST or CURBy)
+    async function fetchBeacon(source = 'NIST') {
         // If running from file://, skip API calls and use crypto only
         if (isFileProtocol()) {
             console.log('Running from local file - using crypto randomness only');
@@ -752,48 +753,62 @@
         }
         
         try {
-            const response = await fetch(`${ENDPOINTS.beacon}?source=${source}`);
+            // Use shared-rng service with specific source (NIST or CURBy)
+            // 512 bits = 128 hex characters
+            const response = await fetch(`${ENDPOINTS.beacon}?bits=512&format=hex&sources=${source}`);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
-            const data = await response.json();
-            if (data.success && data.beacon && data.beacon.value) {
-                return data.beacon.value; // 512-bit hex string
+            const result = await response.json();
+            // shared-rng returns: { success: true, data: { entropy, format, bits, sources, ... } }
+            if (result.success && result.data && result.data.entropy) {
+                return result.data.entropy; // 512-bit hex string
             }
-            throw new Error('Invalid beacon response');
+            throw new Error('Invalid RNG response');
         } catch (e) {
-            console.warn(`Beacon fetch failed (${source}):`, e.message);
+            console.warn(`RNG fetch failed (${source}):`, e.message);
             // Return null to signal fallback needed
             return null;
         }
     }
 
-    // Fetch beacons with random 31-41s intervals between calls, alternating sources
-    async function fetchBeacons(count = CONFIG.entropy.beacons) {
+    // Fetch beacons in 2 waves (2 beacons per wave) with meditation periods
+    // Sacred workflow: meditation (45-68s) → 2 beacons → meditation (63-71s) → 2 beacons
+    // Total: 4 beacons × 512 bits = 2048 bits, then mixed with local crypto
+    async function fetchBeacons(count = 4) {
         if (isFileProtocol()) {
             updateStatus('Running locally - skipping beacon fetch, using crypto randomness only...');
             return []; // Return empty array, will use crypto only
         }
         
-        updateCastingStatus(2, `Fetching ${count} beacons from the cosmic source... Each beacon pulse carries the entropy of universal Shiva. Waiting 31-41 seconds between each invocation as per the sacred timing.`);
-        
         beacons = [];
         
-        // Helper to get random delay between 31-41 seconds
-        const getRandomDelay = () => Math.floor(Math.random() * 10000) + 31000; // 31000-41000ms
+        // Helper to get secure random integer
+        const getSecureRandomInt = (min, max) => {
+            const range = max - min + 1;
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            const maxValid = Math.floor(0x100000000 / range) * range;
+            let randomValue = array[0];
+            while (randomValue >= maxValid) {
+                crypto.getRandomValues(array);
+                randomValue = array[0];
+            }
+            return min + (randomValue % range);
+        };
         
         // Helper to wait with countdown updates
-        const waitWithCountdown = (ms, nextSourceName) => {
+        const waitWithCountdown = (ms, waveNum) => {
             return new Promise(resolve => {
                 const totalSec = Math.ceil(ms / 1000);
                 let remaining = totalSec;
                 
-                updateCastingStatus(2, `Beacon ${beacons.length} acquired ✓ Waiting ${remaining}s for next invocation from ${nextSourceName}... The sacred texts teach us that time is the breath of Brahma.`);
+                updateCastingStatus(2, `Wave ${waveNum} meditation: ${remaining}s remaining... The sacred texts teach us that time is the breath of Brahma.`);
                 
                 const interval = setInterval(() => {
                     remaining--;
                     if (remaining > 0) {
-                        updateCastingStatus(2, `Beacon ${beacons.length} acquired ✓ Waiting ${remaining}s for next invocation from ${nextSourceName}... The sacred texts teach us that time is the breath of Brahma.`);
+                        updateCastingStatus(2, `Wave ${waveNum} meditation: ${remaining}s remaining... The sacred texts teach us that time is the breath of Brahma.`);
                     } else {
                         clearInterval(interval);
                     }
@@ -806,43 +821,67 @@
             });
         };
         
-        for (let i = 0; i < count; i++) {
-            // Alternate between nist and curby sources
-            const source = i % 2 === 0 ? 'nist' : 'curby';
-            const sourceName = source === 'nist' ? 'NIST' : 'CURBy';
-            
-            updateCastingStatus(2, `Fetching beacon ${i + 1} of ${count} from ${sourceName}...`);
-            
-            const beacon = await fetchBeacon(source);
-            if (beacon) {
-                beacons.push(beacon);
-                // Display beacon info
-                const beaconInfo = document.getElementById('beaconInfo');
-                beaconInfo.innerHTML = beacons.map((b, idx) => 
-                    `<div class="beacon-tag">Beacon ${idx + 1}: ${b.substring(0, 16)}...</div>`
-                ).join('');
-            } else {
-                updateStatus(`Beacon ${i + 1} failed - will compensate with crypto randomness`);
-            }
-            
-            // Wait random 31-41 seconds before fetching next beacon (except after the last one)
-            if (i < count - 1) {
-                const nextSource = (i + 1) % 2 === 0 ? 'NIST' : 'CURBy';
-                const delayMs = getRandomDelay();
-                await waitWithCountdown(delayMs, nextSource);
-                if (skipCastingFlag) return beacons; // User skipped
-            }
-        }
+        // === FIRST WAVE ===
+        // First meditation: 45-68 seconds
+        const firstWaitMs = getSecureRandomInt(45000, 68000);
+        updateCastingStatus(2, `First meditation period: ${Math.round(firstWaitMs/1000)}s - preparing to receive cosmic entropy from NIST and CURBy...`);
+        await waitWithCountdown(firstWaitMs, 1);
+        if (skipCastingFlag) return beacons;
+        
+        // Fetch first 2 beacons (NIST + CURBy simultaneously)
+        updateCastingStatus(2, 'Fetching first wave: 2 beacons from NIST and CURBy...');
+        const firstWaveBeacons = await fetchBeaconWave(2);
+        beacons.push(...firstWaveBeacons);
+        
+        // Display beacon info
+        const beaconInfo = document.getElementById('beaconInfo');
+        beaconInfo.innerHTML = beacons.map((b, idx) => 
+            `<div class="beacon-tag">Beacon ${idx + 1}: ${b.substring(0, 16)}...</div>`
+        ).join('');
+        updateStatus(`First wave complete: ${firstWaveBeacons.length} beacons (${firstWaveBeacons.length * 512} bits)`);
+        
+        // === SECOND WAVE ===
+        // Second meditation: 63-71 seconds
+        const secondWaitMs = getSecureRandomInt(63000, 71000);
+        updateCastingStatus(2, `Second meditation period: ${Math.round(secondWaitMs/1000)}s - deepening cosmic connection...`);
+        await waitWithCountdown(secondWaitMs, 2);
+        if (skipCastingFlag) return beacons;
+        
+        // Fetch second 2 beacons
+        updateCastingStatus(2, 'Fetching second wave: 2 beacons from NIST and CURBy...');
+        const secondWaveBeacons = await fetchBeaconWave(2);
+        beacons.push(...secondWaveBeacons);
         
         // Display final beacon info
-        const beaconInfo = document.getElementById('beaconInfo');
+        beaconInfo.innerHTML = beacons.map((b, idx) => 
+            `<div class="beacon-tag">Beacon ${idx + 1}: ${b.substring(0, 16)}...</div>`
+        ).join('');
+        
         if (beacons.length > 0) {
-            updateStatus(`${beacons.length} beacons acquired ✓`);
+            updateStatus(`${beacons.length} beacons acquired ✓ Total: ${beacons.length * 512} bits`);
         } else {
             beaconInfo.innerHTML = '<div class="beacon-tag">Using crypto randomness only</div>';
         }
         
         return beacons;
+    }
+    
+    // Fetch a wave of beacons (multiple sources simultaneously)
+    async function fetchBeaconWave(waveCount) {
+        const waveBeacons = [];
+        
+        // For each beacon in the wave, alternate between NIST and CURBy
+        for (let i = 0; i < waveCount; i++) {
+            const source = i % 2 === 0 ? 'NIST' : 'CURBy';
+            const beacon = await fetchBeacon(source);
+            if (beacon) {
+                waveBeacons.push(beacon);
+            } else {
+                updateStatus(`Beacon ${beacons.length + i + 1} (${source}) failed - will compensate with crypto randomness`);
+            }
+        }
+        
+        return waveBeacons;
     }
 
     // Generate random blocks dynamically based on required entropy
@@ -1286,7 +1325,7 @@
             if (skipCastingFlag) return;
             
             // Step 2: Fetch beacons from the cosmic source
-            updateCastingStatus(2, "Fetching cosmic entropy... Beacon 1/3 from NIST (next: CURBy in ~35s). These pulses carry the entropy of universal Shiva, the divine randomness that underlies all cosmic order.");
+            updateCastingStatus(2, "Fetching cosmic entropy... First meditation (45-68s), then 2 beacons from NIST and CURBy. These pulses carry the entropy of universal Shiva, the divine randomness that underlies all cosmic order.");
             const seed = await generateSeed();
             await delay(1500);
             if (skipCastingFlag) return;
